@@ -1,7 +1,7 @@
 {
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
-    "toolVersion": "7.18.20",
+    "toolVersion": "7.19.4",
     "schemaVersion": 1004,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
@@ -160,18 +160,18 @@
     }
   },
   "kind": "Package",
-  "canonicalReference": "@google-cloud/functions-framework!",
+  "canonicalReference": "@openfunction/functions-framework!",
   "docComment": "",
-  "name": "@google-cloud/functions-framework",
+  "name": "@openfunction/functions-framework",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "@google-cloud/functions-framework!",
+      "canonicalReference": "@openfunction/functions-framework!",
       "name": "",
       "members": [
         {
           "kind": "Variable",
-          "canonicalReference": "@google-cloud/functions-framework!cloudEvent:var",
+          "canonicalReference": "@openfunction/functions-framework!cloudEvent:var",
           "docComment": "/**\n * Register a function that handles CloudEvents.\n *\n * @param functionName - the name of the function\n *\n * @param handler - the function to trigger when handling CloudEvents\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -185,7 +185,7 @@
             {
               "kind": "Reference",
               "text": "CloudEventFunction",
-              "canonicalReference": "@google-cloud/functions-framework!CloudEventFunction:interface"
+              "canonicalReference": "@openfunction/functions-framework!CloudEventFunction:interface"
             },
             {
               "kind": "Content",
@@ -201,7 +201,7 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "@google-cloud/functions-framework!CloudEventFunction:interface",
+          "canonicalReference": "@openfunction/functions-framework!CloudEventFunction:interface",
           "docComment": "/**\n * A CloudEvent function handler.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -235,7 +235,7 @@
           "members": [
             {
               "kind": "CallSignature",
-              "canonicalReference": "@google-cloud/functions-framework!CloudEventFunction:call(1)",
+              "canonicalReference": "@openfunction/functions-framework!CloudEventFunction:call(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -285,7 +285,7 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "@google-cloud/functions-framework!CloudEventFunctionWithCallback:interface",
+          "canonicalReference": "@openfunction/functions-framework!CloudEventFunctionWithCallback:interface",
           "docComment": "/**\n * A CloudEvent function handler with callback.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -319,7 +319,7 @@
           "members": [
             {
               "kind": "CallSignature",
-              "canonicalReference": "@google-cloud/functions-framework!CloudEventFunctionWithCallback:call(1)",
+              "canonicalReference": "@openfunction/functions-framework!CloudEventFunctionWithCallback:call(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -385,7 +385,7 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "@google-cloud/functions-framework!CloudFunctionsContext:interface",
+          "canonicalReference": "@openfunction/functions-framework!CloudFunctionsContext:interface",
           "docComment": "/**\n * The Cloud Functions context object for the event. {@link https://cloud.google.com/functions/docs/writing/background#function_parameters}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -398,7 +398,7 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@google-cloud/functions-framework!CloudFunctionsContext#eventId:member",
+              "canonicalReference": "@openfunction/functions-framework!CloudFunctionsContext#eventId:member",
               "docComment": "/**\n * A unique ID for the event. For example: \"70172329041928\".\n */\n",
               "excerptTokens": [
                 {
@@ -424,7 +424,7 @@
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@google-cloud/functions-framework!CloudFunctionsContext#eventType:member",
+              "canonicalReference": "@openfunction/functions-framework!CloudFunctionsContext#eventType:member",
               "docComment": "/**\n * The type of the event. For example: \"google.pubsub.topic.publish\".\n */\n",
               "excerptTokens": [
                 {
@@ -450,7 +450,7 @@
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@google-cloud/functions-framework!CloudFunctionsContext#resource:member",
+              "canonicalReference": "@openfunction/functions-framework!CloudFunctionsContext#resource:member",
               "docComment": "/**\n * The resource that emitted the event.\n */\n",
               "excerptTokens": [
                 {
@@ -476,7 +476,7 @@
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@google-cloud/functions-framework!CloudFunctionsContext#timestamp:member",
+              "canonicalReference": "@openfunction/functions-framework!CloudFunctionsContext#timestamp:member",
               "docComment": "/**\n * The date/time this event was created. For example: \"2018-04-09T07:56:12.975Z\" This will be formatted as ISO 8601.\n */\n",
               "excerptTokens": [
                 {
@@ -505,7 +505,7 @@
         },
         {
           "kind": "TypeAlias",
-          "canonicalReference": "@google-cloud/functions-framework!Context:type",
+          "canonicalReference": "@openfunction/functions-framework!Context:type",
           "docComment": "/**\n * The function's context.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -515,7 +515,7 @@
             {
               "kind": "Reference",
               "text": "CloudFunctionsContext",
-              "canonicalReference": "@google-cloud/functions-framework!CloudFunctionsContext:interface"
+              "canonicalReference": "@openfunction/functions-framework!CloudFunctionsContext:interface"
             },
             {
               "kind": "Content",
@@ -544,7 +544,7 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "@google-cloud/functions-framework!Data:interface",
+          "canonicalReference": "@openfunction/functions-framework!Data:interface",
           "docComment": "/**\n * A data object used for legacy event functions.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -557,7 +557,7 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@google-cloud/functions-framework!Data#data:member",
+              "canonicalReference": "@openfunction/functions-framework!Data#data:member",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -586,7 +586,7 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "@google-cloud/functions-framework!EventFunction:interface",
+          "canonicalReference": "@openfunction/functions-framework!EventFunction:interface",
           "docComment": "/**\n * A legacy event function handler.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -599,7 +599,7 @@
           "members": [
             {
               "kind": "CallSignature",
-              "canonicalReference": "@google-cloud/functions-framework!EventFunction:call(1)",
+              "canonicalReference": "@openfunction/functions-framework!EventFunction:call(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -617,7 +617,7 @@
                 {
                   "kind": "Reference",
                   "text": "Context",
-                  "canonicalReference": "@google-cloud/functions-framework!Context:type"
+                  "canonicalReference": "@openfunction/functions-framework!Context:type"
                 },
                 {
                   "kind": "Content",
@@ -660,7 +660,7 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "@google-cloud/functions-framework!EventFunctionWithCallback:interface",
+          "canonicalReference": "@openfunction/functions-framework!EventFunctionWithCallback:interface",
           "docComment": "/**\n * A legacy event function handler with callback.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -673,7 +673,7 @@
           "members": [
             {
               "kind": "CallSignature",
-              "canonicalReference": "@google-cloud/functions-framework!EventFunctionWithCallback:call(1)",
+              "canonicalReference": "@openfunction/functions-framework!EventFunctionWithCallback:call(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -691,7 +691,7 @@
                 {
                   "kind": "Reference",
                   "text": "Context",
-                  "canonicalReference": "@google-cloud/functions-framework!Context:type"
+                  "canonicalReference": "@openfunction/functions-framework!Context:type"
                 },
                 {
                   "kind": "Content",
@@ -750,7 +750,7 @@
         },
         {
           "kind": "TypeAlias",
-          "canonicalReference": "@google-cloud/functions-framework!HandlerFunction:type",
+          "canonicalReference": "@openfunction/functions-framework!HandlerFunction:type",
           "docComment": "/**\n * A function handler.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -768,7 +768,7 @@
             {
               "kind": "Reference",
               "text": "HttpFunction",
-              "canonicalReference": "@google-cloud/functions-framework!HttpFunction:interface"
+              "canonicalReference": "@openfunction/functions-framework!HttpFunction:interface"
             },
             {
               "kind": "Content",
@@ -777,7 +777,7 @@
             {
               "kind": "Reference",
               "text": "EventFunction",
-              "canonicalReference": "@google-cloud/functions-framework!EventFunction:interface"
+              "canonicalReference": "@openfunction/functions-framework!EventFunction:interface"
             },
             {
               "kind": "Content",
@@ -786,7 +786,7 @@
             {
               "kind": "Reference",
               "text": "EventFunctionWithCallback",
-              "canonicalReference": "@google-cloud/functions-framework!EventFunctionWithCallback:interface"
+              "canonicalReference": "@openfunction/functions-framework!EventFunctionWithCallback:interface"
             },
             {
               "kind": "Content",
@@ -795,7 +795,7 @@
             {
               "kind": "Reference",
               "text": "CloudEventFunction",
-              "canonicalReference": "@google-cloud/functions-framework!CloudEventFunction:interface"
+              "canonicalReference": "@openfunction/functions-framework!CloudEventFunction:interface"
             },
             {
               "kind": "Content",
@@ -804,7 +804,7 @@
             {
               "kind": "Reference",
               "text": "CloudEventFunctionWithCallback",
-              "canonicalReference": "@google-cloud/functions-framework!CloudEventFunctionWithCallback:interface"
+              "canonicalReference": "@openfunction/functions-framework!CloudEventFunctionWithCallback:interface"
             },
             {
               "kind": "Content",
@@ -837,7 +837,7 @@
         },
         {
           "kind": "Variable",
-          "canonicalReference": "@google-cloud/functions-framework!http:var",
+          "canonicalReference": "@openfunction/functions-framework!http:var",
           "docComment": "/**\n * Register a function that responds to HTTP requests.\n *\n * @param functionName - the name of the function\n *\n * @param handler - the function to invoke when handling HTTP requests\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -851,7 +851,7 @@
             {
               "kind": "Reference",
               "text": "HttpFunction",
-              "canonicalReference": "@google-cloud/functions-framework!HttpFunction:interface"
+              "canonicalReference": "@openfunction/functions-framework!HttpFunction:interface"
             },
             {
               "kind": "Content",
@@ -867,7 +867,7 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "@google-cloud/functions-framework!HttpFunction:interface",
+          "canonicalReference": "@openfunction/functions-framework!HttpFunction:interface",
           "docComment": "/**\n * A HTTP function handler.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -880,7 +880,7 @@
           "members": [
             {
               "kind": "CallSignature",
-              "canonicalReference": "@google-cloud/functions-framework!HttpFunction:call(1)",
+              "canonicalReference": "@openfunction/functions-framework!HttpFunction:call(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -890,7 +890,7 @@
                 {
                   "kind": "Reference",
                   "text": "Request",
-                  "canonicalReference": "@google-cloud/functions-framework!Request:interface"
+                  "canonicalReference": "@openfunction/functions-framework!Request:interface"
                 },
                 {
                   "kind": "Content",
@@ -942,7 +942,7 @@
         },
         {
           "kind": "TypeAlias",
-          "canonicalReference": "@google-cloud/functions-framework!LegacyCloudFunctionsContext:type",
+          "canonicalReference": "@openfunction/functions-framework!LegacyCloudFunctionsContext:type",
           "docComment": "/**\n * A legacy event function context.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -952,7 +952,7 @@
             {
               "kind": "Reference",
               "text": "CloudFunctionsContext",
-              "canonicalReference": "@google-cloud/functions-framework!CloudFunctionsContext:interface"
+              "canonicalReference": "@openfunction/functions-framework!CloudFunctionsContext:interface"
             },
             {
               "kind": "Content",
@@ -961,7 +961,7 @@
             {
               "kind": "Reference",
               "text": "Data",
-              "canonicalReference": "@google-cloud/functions-framework!Data:interface"
+              "canonicalReference": "@openfunction/functions-framework!Data:interface"
             },
             {
               "kind": "Content",
@@ -977,7 +977,7 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "@google-cloud/functions-framework!LegacyEvent:interface",
+          "canonicalReference": "@openfunction/functions-framework!LegacyEvent:interface",
           "docComment": "/**\n * A legacy event.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -990,7 +990,7 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@google-cloud/functions-framework!LegacyEvent#context:member",
+              "canonicalReference": "@openfunction/functions-framework!LegacyEvent#context:member",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -1000,7 +1000,7 @@
                 {
                   "kind": "Reference",
                   "text": "CloudFunctionsContext",
-                  "canonicalReference": "@google-cloud/functions-framework!CloudFunctionsContext:interface"
+                  "canonicalReference": "@openfunction/functions-framework!CloudFunctionsContext:interface"
                 },
                 {
                   "kind": "Content",
@@ -1017,7 +1017,7 @@
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@google-cloud/functions-framework!LegacyEvent#data:member",
+              "canonicalReference": "@openfunction/functions-framework!LegacyEvent#data:member",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -1046,7 +1046,7 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "@google-cloud/functions-framework!Request_2:interface",
+          "canonicalReference": "@openfunction/functions-framework!Request_2:interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1068,7 +1068,7 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "@google-cloud/functions-framework!Request_2#rawBody:member",
+              "canonicalReference": "@openfunction/functions-framework!Request_2#rawBody:member",
               "docComment": "/**\n * A buffer which provides access to the request's raw HTTP body.\n */\n",
               "excerptTokens": [
                 {

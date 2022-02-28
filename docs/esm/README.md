@@ -1,6 +1,6 @@
 # Using ES Modules
 
-The Functions Framework >= `1.9.0` supports loading your code as an ES Module.
+The Functions Framework >= `0.3.6` supports loading your code as an ES Module.
 
 ECMAScript modules (ES modules or ESM) are a TC39 standard, unflagged feature in Node >=14 for loading JavaScript modules. As opposed to CommonJS, ESM provides an asynchronous API for loading modules and provides a very commonly adopted syntax improvement via `import` and `export` statements.
 
@@ -36,9 +36,14 @@ Create a `package.json` file:
   },
   "main": "index.js",
   "dependencies": {
-    "@google-cloud/functions-framework": "^1.9.0"
+    "@openfunction/functions-framework": "^0.3.6"
   }
 }
+```
+
+Update corresponding `package-lock.json`:
+```shell
+npm install @openfunction/functions-framework --package-lock-only
 ```
 
 Create a `index.js` file:

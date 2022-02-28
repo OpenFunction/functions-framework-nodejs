@@ -1,6 +1,6 @@
 /* eslint-disable node/no-missing-require */
 const fs = require('fs');
-const functions = require('@google-cloud/functions-framework');
+const functions = require('@openfunction/functions-framework');
 const fileName = 'function_output.json';
 
 functions.http('writeHttpDeclarative', (req, res) => {

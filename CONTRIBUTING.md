@@ -47,8 +47,10 @@ npm run conformance
 When developing a feature locally, you can install a local version of the Functions Framework
 using `npm link`. First compile your local clone of the Functions Framework:
 
+> You'll need to install typescript first by: `npm install typescript --save-dev`
+
 ```
-npm compile
+npx tsc
 ```
 
 Then link the Functions Framework using `npm link`.
@@ -63,25 +65,33 @@ You can then run the Functions Framework locally using `functions-framework`.
 
 This module is published using Release Please. When you merge a release PR, the npm package will be automatically published.
 
+```shell
+# Login to npm registry, contact repo admin for https://www.npmjs.com/ user name and password
+npm login
+# First run a dry run to find out errors
+npm publish ./ --access public --dry-run
+# Then publish the package
+npm publish --access public
+```
 ### Reverting a Publish
 
 If the release process fails, you can revert the publish by running the following (i.e. unpublishing `1.10.0`):
 
 ```sh
-# Login to the Wombat Dressing Room. Create a 24 hour token. Close the window.
-npm login --registry https://wombat-dressing-room.appspot.com
 # Unpublish the package (must be done within 72 hours of publishing).
 # If >72 hours, deprecate a specific release and publish a newer version.
-# i.e. `npm deprecate @google-cloud/functions-framework@1.10.0 "Deprecate 1.10.0" 
+# i.e. `npm deprecate @openfunction/functions-framework@0.3.6 "archive old version"` 
 # See https://docs.npmjs.com/policies/unpublish#what-to-do-if-your-package-does-not-meet-the-unpublish-criteria
-npm unpublish @google-cloud/functions-framework@1.10.0
+npm unpublish @openfunction/functions-framework@0.3.6
 # Set the default version to the previous working version.
-npm dist-tag add @google-cloud/functions-framework@1.9.0 latest --registry=https://wombat-dressing-room.appspot.com
+npm dist-tag add @openfunction/functions-framework@0.3.3 latest
 ```
 
 ### API Extractor
 
 To generate the API Extractor documentation, run the API extractor with the following command:
+
+> You'll need to install `api-extractor` first by `npm install -g @microsoft/api-extractor` and then install `gts` by `npm install gts`
 
 ```sh
 npm run docs

@@ -12,7 +12,7 @@ the Functions Framework.
 2. Install the required packages:
 
     ```sh
-    npm install @google-cloud/functions-framework
+    npm install @openfunction/functions-framework
     npm install @types/express concurrently nodemon --save-dev
     ```
 
@@ -31,7 +31,7 @@ the Functions Framework.
 4. Replace the contents of `src/index.ts` with:
 
     ```ts
-    import type { HttpFunction } from '@google-cloud/functions-framework/build/src/functions';
+    import type { HttpFunction } from '@openfunction/functions-framework/build/src/functions';
 
     export const helloWorld: HttpFunction = (req, res) => {
       res.send('Hello, World');

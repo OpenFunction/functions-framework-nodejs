@@ -1,11 +1,11 @@
 {
-  "name": "@google-cloud/functions-framework",
-  "version": "3.0.0",
+  "name": "@openfunction/functions-framework",
+  "version": "0.3.6",
   "description": "FaaS (Function as a service) framework for writing portable Node.js functions",
   "engines": {
     "node": ">=10.0.0"
   },
-  "repository": "GoogleCloudPlatform/functions-framework-nodejs",
+  "repository": "openfunction/functions-framework-nodejs",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
   "exports": {
@@ -13,6 +13,7 @@
     "./testing": "./build/src/testing.js"
   },
   "dependencies": {
+    "@openfunction/functions-framework": "0.3.6",
     "body-parser": "^1.18.3",
     "cloudevents": "^5.3.2",
     "express": "^4.16.4",
@@ -42,7 +43,7 @@
     "functions-framework": "./build/src/main.js",
     "functions-framework-nodejs": "./build/src/main.js"
   },
-  "author": "Google Inc.",
+  "author": "OpenFunction",
   "license": "Apache-2.0",
   "devDependencies": {
     "@microsoft/api-extractor": "^7.18.20",
@@ -60,6 +61,6 @@
     "pack-n-play": "^1.0.0-2",
     "sinon": "^12.0.0",
     "supertest": "6.1.6",
-    "typescript": "4.5.4"
+    "typescript": "^4.5.5"
   }
 }

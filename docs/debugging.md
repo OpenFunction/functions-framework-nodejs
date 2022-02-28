@@ -13,7 +13,7 @@ exports.helloWorld = (req, res) => {
 2. Install the Functions Framework:
 
 ```sh
-npm install @google-cloud/functions-framework
+npm install @openfunction/functions-framework
 ```
 
 3. Run `node`, enable the inspector and run the Functions Framework:

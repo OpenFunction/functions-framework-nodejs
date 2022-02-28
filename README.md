@@ -1,11 +1,13 @@
 # Functions Framework for Node.js
 
-[![npm version](https://img.shields.io/npm/v/@google-cloud/functions-framework.svg)](https://www.npmjs.com/package/@google-cloud/functions-framework) [![npm downloads](https://img.shields.io/npm/dm/@google-cloud/functions-framework.svg)](https://npmcharts.com/compare/@google-cloud/functions-framework?minimal=true)
+[![npm version](https://img.shields.io/npm/v/@openfunction/functions-framework.svg)](https://www.npmjs.com/package/@openfunction/functions-framework) [![npm downloads](https://img.shields.io/npm/dm/@openfunction/functions-framework.svg)](https://npmcharts.com/compare/@openfunction/functions-framework?minimal=true)
 
 [![Node unit CI][ff_node_unit_img]][ff_node_unit_link] [![Node lint CI][ff_node_lint_img]][ff_node_lint_link] [![Node conformace CI][ff_node_conformance_img]][ff_node_conformance_link]
 
+> This is OpenFunction's nodejs functions-framework forked from [GCP functions-framework-nodejs](https://github.com/GoogleCloudPlatform/functions-framework-nodejs)
+
 An open source FaaS (Function as a Service) framework based on [Express](https://expressjs.com/)
-for writing portable Node.js functions -- brought to you by the Google Cloud Functions team.
+for writing portable Node.js functions
 
 The Functions Framework lets you write lightweight functions that run in many
 different environments, including:
@@ -14,6 +16,7 @@ different environments, including:
 *   Your local development machine
 *   [Cloud Run](https://cloud.google.com/run/) and [Cloud Run for Anthos](https://cloud.google.com/anthos/run)
 *   [Knative](https://github.com/knative/)-based environments
+*   [OpenFunction](https://github.com/OpenFunction/OpenFunction)
 
 The framework allows you to go from:
 
@@ -53,7 +56,7 @@ handling logic.
 Add the Functions Framework to your `package.json` file using `npm`.
 
 ```sh
-npm install @google-cloud/functions-framework
+npm install @openfunction/functions-framework
 ```
 
 ## Quickstarts
@@ -71,7 +74,7 @@ npm install @google-cloud/functions-framework
 1. Run the following command:
 
     ```sh
-    npx @google-cloud/functions-framework --target=helloWorld
+    npx @openfunction/functions-framework --target=helloWorld
     ```
 
 1. Open http://localhost:8080/ in your browser and see _Hello, World_.
@@ -95,7 +98,7 @@ npm install @google-cloud/functions-framework
 1. Now install the Functions Framework:
 
     ```sh
-    npm install @google-cloud/functions-framework
+    npm install @openfunction/functions-framework
     ```
 
 1. Add a `start` script to `package.json`, with configuration passed via
@@ -132,9 +135,9 @@ command-line arguments:
 	
     ```sh
     pack build \
-      --builder gcr.io/buildpacks/builder:v1 \
-      --env GOOGLE_FUNCTION_SIGNATURE_TYPE=http \
-      --env GOOGLE_FUNCTION_TARGET=helloWorld \
+      --builder openfunction/builder-node:v2-16.13 \
+      --env FUNC_TYPE=http \
+      --env FUNC_NAME=helloWorld \
       my-first-function
     ```
 
@@ -228,7 +231,7 @@ It will be passed as an argument to your function when it receives a request.
 Note that your function must use the `cloudevent`-style function signature:
 
 ```js
-const functions = require('@google-cloud/functions-framework');
+const functions = require('@openfunction/functions-framework');
 
 functions.cloudEvent('helloCloudEvents', (cloudevent) => {
   console.log(cloudevent.specversion);
@@ -246,7 +249,7 @@ To enable the CloudEvent functions, you must list the Functions Framework as a d
 ```json
 {
   "dependencies": {
-    "@google-cloud/functions-framework": "~2.0.0-beta.1"
+    "@openfunction/functions-framework": "~0.3.6"
   }
 }
 ```
@@ -262,9 +265,9 @@ More advanced guides and docs can be found in the [`docs/` folder](docs/).
 Contributions to this library are welcome and encouraged. See
 [CONTRIBUTING](CONTRIBUTING.md) for more information on how to get started.
 
-[ff_node_unit_img]: https://github.com/GoogleCloudPlatform/functions-framework-nodejs/workflows/Node.js%20Unit%20CI/badge.svg
-[ff_node_unit_link]:  https://github.com/GoogleCloudPlatform/functions-framework-nodejs/actions?query=workflow%3A"Node.js+Unit+CI"
-[ff_node_lint_img]: https://github.com/GoogleCloudPlatform/functions-framework-nodejs/workflows/Node.js%20Lint%20CI/badge.svg
-[ff_node_lint_link]:  https://github.com/GoogleCloudPlatform/functions-framework-nodejs/actions?query=workflow%3A"Node.js+Lint+CI"
-[ff_node_conformance_img]: https://github.com/GoogleCloudPlatform/functions-framework-nodejs/workflows/Node.js%20Conformance%20CI/badge.svg
-[ff_node_conformance_link]:  https://github.com/GoogleCloudPlatform/functions-framework-nodejs/actions?query=workflow%3A"Node.js+Conformance+CI"
+[ff_node_unit_img]: https://github.com/openfunction/functions-framework-nodejs/workflows/Node.js%20Unit%20CI/badge.svg
+[ff_node_unit_link]:  https://github.com/openfunction/functions-framework-nodejs/actions?query=workflow%3A"Node.js+Unit+CI"
+[ff_node_lint_img]: https://github.com/openfunction/functions-framework-nodejs/workflows/Node.js%20Lint%20CI/badge.svg
+[ff_node_lint_link]:  https://github.com/openfunction/functions-framework-nodejs/actions?query=workflow%3A"Node.js+Lint+CI"
+[ff_node_conformance_img]: https://github.com/openfunction/functions-framework-nodejs/workflows/Node.js%20Conformance%20CI/badge.svg
+[ff_node_conformance_link]:  https://github.com/openfunction/functions-framework-nodejs/actions?query=workflow%3A"Node.js+Conformance+CI"

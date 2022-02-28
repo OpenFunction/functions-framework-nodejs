@@ -16,7 +16,7 @@ the output. You do not need to set up (or mock) an actual server.
 The Functions Framework provides utility methods that streamline the process of
 setting up functions and the environment for testing, constructing input
 parameters, and interpreting results. These are available in the
-`@google-cloud/functions-framework/testing` module.
+`@openfunction/functions-framework/testing` module.
 
 ## Loading functions for testing
 
@@ -25,7 +25,7 @@ export the functions you wish to unit test.
 
 ```js
 // hello_tests.js
-import * as functions from '@google-cloud/functions-framework';
+import * as functions from '@openfunction/functions-framework';
 
 // declare a cloud function and export it so that it can be
 // imported in unit tests
@@ -44,7 +44,7 @@ that are available when you pass a callback to `functions.http` directly:
 
 ```js
 // hello_tests.js
-import * as functions from '@google-cloud/functions-framework';
+import * as functions from '@openfunction/functions-framework';
 
 // register the HelloTests with the Functions Framework
 functions.http('HelloTests', (req, res) => {
@@ -58,7 +58,7 @@ your unit test you must first load the module that registers the function you wi
 to test.
 
 ```js
-import {getFunction} from "@google-cloud/functions-framework/testing";
+import {getFunction} from "@openfunction/functions-framework/testing";
 
 describe("HelloTests", () => {
   before(async () => {
@@ -85,7 +85,7 @@ create simple stubs to use in unit tests.
 
 ```js
 import assert from "assert";
-import {getFunction} from "@google-cloud/functions-framework/testing";
+import {getFunction} from "@openfunction/functions-framework/testing";
 
 describe("HelloTests", () => {
   before(async () => {
@@ -134,7 +134,7 @@ any Javascript testing framework:
 import assert from "assert";
 import sinon from "sinon";
 import {CloudEvent} from "cloudevents";
-import {getFunction} from "@google-cloud/functions-framework/testing";
+import {getFunction} from "@openfunction/functions-framework/testing";
 
 import {MyDependency} from "./my_dependency.js";
 
@@ -177,7 +177,7 @@ SuperTest.
 
 ```js
 import supertest from 'supertest';
-import {getTestServer} from '@google-cloud/functions-framework/testing';
+import {getTestServer} from '@openfunction/functions-framework/testing';
 
 describe("HelloTests", function () {
   before(async () => {
