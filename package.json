@@ -1,6 +1,6 @@
 {
   "name": "@openfunction/functions-framework",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "FaaS (Function as a service) framework for writing portable Node.js functions",
   "engines": {
     "node": ">=13.0.0"
@@ -66,7 +66,7 @@
     "concurrently": "^7.0.0",
     "cross-env": "^7.0.3",
     "env-cmd": "^10.1.0",
-    "gts": "3.1.0",
+    "gts": "^3.1.0",
     "mocha": "9.1.2",
     "pack-n-play": "^1.0.0-2",
     "shelljs": "^0.8.5",
