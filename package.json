@@ -64,7 +64,7 @@
     "@types/semver": "^7.3.6",
     "@types/shelljs": "^0.8.11",
     "@types/sinon": "^10.0.0",
-    "@types/supertest": "2.0.11",
+    "@types/supertest": "2.0.12",
     "aedes": "^0.47.0",
     "concurrently": "^7.0.0",
     "cross-env": "^7.0.3",
