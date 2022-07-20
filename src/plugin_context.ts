@@ -1,5 +1,4 @@
 import {OpenFunctionRuntime} from './functions';
-import {Request, Response} from 'express';
 /**
  * The OpenFunction's plugin  context.
  * @public
