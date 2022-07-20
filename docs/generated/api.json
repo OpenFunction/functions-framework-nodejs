@@ -1,8 +1,8 @@
 {
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
-    "toolVersion": "7.27.0",
-    "schemaVersion": 1008,
+    "toolVersion": "7.28.4",
+    "schemaVersion": 1009,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -1602,6 +1602,7 @@
                   "text": ";"
                 }
               ],
+              "isReadonly": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
                 "endIndex": 4
