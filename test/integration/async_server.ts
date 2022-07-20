@@ -2,7 +2,7 @@
 import {deepStrictEqual, ifError, ok} from 'assert';
 import {createServer} from 'net';
 
-import {get} from 'lodash';
+import {get, isEmpty} from 'lodash';
 import * as shell from 'shelljs';
 import * as MQTT from 'aedes';
 
@@ -54,7 +54,16 @@ const TEST_CONTEXT: OpenFunctionContext = {
     },
   },
 };
+
 const TEST_PAYLOAD = {data: 'hello world'};
+const TEST_CLOUD_EVENT = {
+  specversion: '1.0',
+  id: 'test-1234-1234',
+  type: 'ce.openfunction',
+  source: 'https://github.com/OpenFunction/functions-framework-nodejs',
+  traceparent: '00-65088630f09e0a5359677a7429456db7-97f23477fb2bf5ec-01',
+  data: TEST_PAYLOAD,
+};
 
 describe('OpenFunction - Async - Binding', () => {
   const APPID = 'async.dapr';
@@ -139,15 +148,12 @@ describe('OpenFunction - Async - Binding', () => {
 
   it('mqtt sub w/ pub output', done => {
     const app = getAysncServer((ctx, data) => {
-      // Assert that user function receives correct data from input binding
-      try {
-        const recieved = JSON.parse(data as string);
-        deepStrictEqual(recieved, TEST_PAYLOAD);
-      } catch (err) {
-        ifError(err);
-      }
+      if (isEmpty(data)) return;
 
-      // Then write recived data to a local file
+      // Assert that user function receives correct data from input binding
+      deepStrictEqual(data, TEST_PAYLOAD);
+
+      // Then forward received data to output channel
       const output = 'mqtt_pub';
       broker.subscribe(
         get(TEST_CONTEXT, `outputs.${output}.uri`),
@@ -165,15 +171,17 @@ describe('OpenFunction - Async - Binding', () => {
 
     // First, we start the async server
     app.start().then(() => {
-      // Then, we publish a message via Dapr CLI
-      const formatted = JSON.stringify(TEST_PAYLOAD).replace(/"/g, '\\"');
-      shell.exec(
-        `dapr publish -i ${APPID} -p ${
-          TEST_CONTEXT.inputs!.mqtt_sub!.componentName
-        } -t ${TEST_CONTEXT.inputs!.mqtt_sub.uri} -d '"${formatted}"'`,
+      // Then, we send a cloudevent format message to server
+      broker.publish(
         {
-          silent: true,
-        }
+          cmd: 'publish',
+          topic: TEST_CONTEXT.inputs!.mqtt_sub.uri!,
+          payload: JSON.stringify(TEST_CLOUD_EVENT),
+          qos: 0,
+          retain: false,
+          dup: false,
+        },
+        err => ifError(err)
       );
     });
   });

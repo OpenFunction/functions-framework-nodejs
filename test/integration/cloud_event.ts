@@ -25,7 +25,7 @@ import {FUNCTION_STATUS_HEADER_FIELD} from '../../src/types';
 const TEST_CLOUD_EVENT = {
   specversion: '1.0',
   type: 'com.google.cloud.storage',
-  source: 'https://github.com/GoogleCloudPlatform/functions-framework-nodejs',
+  source: 'https://github.com/OpenFunction/functions-framework-nodejs',
   subject: 'test-subject',
   id: 'test-1234-1234',
   time: '2020-05-13T01:23:45Z',
