@@ -19,7 +19,7 @@ import * as minimist from 'minimist';
 
 import {SignatureType, isValidSignatureType} from './types';
 import {OpenFunctionContext} from './openfunction/function_context';
-import { PluginContext } from './plugin_context';
+import {PluginContext} from './plugin_context';
 
 const debug = Debug('common:options');
 
@@ -57,7 +57,7 @@ export interface FrameworkOptions {
   /**
    * The context to use for the function when serving.
    */
-   plugin?: PluginContext;
+  plugin?: PluginContext;
   /**
    * Whether or not the --help CLI flag was provided.
    */
