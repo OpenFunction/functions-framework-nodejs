@@ -5,6 +5,7 @@ import {OpenFunction} from '../functions';
 
 import {OpenFunctionContext, ContextUtils} from './function_context';
 import {OpenFunctionRuntime} from './function_runtime';
+import {PluginContext, PluginContextRuntime} from '../plugin_context';
 
 export type AsyncFunctionServer = DaprServer;
 
@@ -17,13 +18,38 @@ export type AsyncFunctionServer = DaprServer;
  */
 export default function (
   userFunction: OpenFunction,
-  context: OpenFunctionContext
+  context: OpenFunctionContext,
+  pluginContext?: PluginContext
 ): AsyncFunctionServer {
   const app = new DaprServer('localhost', context.port);
   const ctx = OpenFunctionRuntime.ProxyContext(context);
 
   const wrapper = async (data: object) => {
+    const runtime: PluginContextRuntime | undefined = pluginContext
+      ? {
+          pluginContext: pluginContext,
+          data: data,
+          context: ctx,
+        }
+      : undefined;
+
+    if (runtime) {
+      runtime.context = ctx;
+      runtime.data = data;
+      for (let i = 0; i < runtime.pluginContext.prePluginFuncs!.length; i++) {
+        await runtime.pluginContext.prePluginFuncs![i](pluginContext);
+        data = runtime.data;
+      }
+    }
     await userFunction(ctx, data);
+    if (runtime) {
+      runtime.context = ctx;
+      runtime.data = data;
+      for (let i = 0; i < runtime.pluginContext.postPluginFuncs!.length; i++) {
+        await runtime.pluginContext.postPluginFuncs![i](pluginContext);
+        data = runtime.data;
+      }
+    }
   };
 
   // Initialize the server with the user's function.
