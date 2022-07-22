@@ -26,7 +26,7 @@ import {
   OpenFunctionContext,
   ContextUtils,
 } from './openfunction/function_context';
-import {getPlugins} from './plugin';
+import {loadPlugins} from './plugin';
 
 /**
  * Main entrypoint for the functions framework that loads the user's function
@@ -51,16 +51,17 @@ export const main = async () => {
       process.exit(1);
     }
     const {userFunction, signatureType} = loadedFunction;
-    if (options.plugin) {
-      options.plugin = await getPlugins(options.sourceLocation, options.plugin);
+    if (options.context) {
+      options.context.pluginMap = await loadPlugins(
+        options.sourceLocation,
+        options.context
+      );
     }
     if (ContextUtils.IsAsyncRuntime(options.context as OpenFunctionContext)) {
       options.context!.port = options.port;
-
       const server = getAysncServer(
         userFunction! as OpenFunction,
-        options.context!,
-        options.plugin
+        options.context!
       );
       await server.start();
     } else {

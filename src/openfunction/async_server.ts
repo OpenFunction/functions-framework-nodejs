@@ -3,9 +3,13 @@ import {DaprServer} from '@dapr/dapr';
 
 import {OpenFunction} from '../functions';
 
-import {OpenFunctionContext, ContextUtils} from './function_context';
+import {
+  OpenFunctionContext,
+  ContextUtils,
+  PluginContextRuntime,
+  Plugin,
+} from './function_context';
 import {OpenFunctionRuntime} from './function_runtime';
-import {PluginContext, PluginContextRuntime} from '../plugin_context';
 
 export type AsyncFunctionServer = DaprServer;
 
@@ -18,36 +22,33 @@ export type AsyncFunctionServer = DaprServer;
  */
 export default function (
   userFunction: OpenFunction,
-  context: OpenFunctionContext,
-  pluginContext?: PluginContext
+  context: OpenFunctionContext
 ): AsyncFunctionServer {
   const app = new DaprServer('localhost', context.port);
   const ctx = OpenFunctionRuntime.ProxyContext(context);
 
   const wrapper = async (data: object) => {
-    const runtime: PluginContextRuntime | undefined = pluginContext
-      ? {
-          pluginContext: pluginContext,
-          data: data,
-          context: ctx,
+    const runtime: PluginContextRuntime = {
+      context: context,
+      data: data,
+    };
+    if (context.prePlugins) {
+      for (let i = 0; i < context.prePlugins!.length; i++) {
+        const p = context.pluginMap?.get(context.prePlugins![i]);
+        if (p) {
+          await p.execPreHook(runtime, context.pluginMap!);
+          data = runtime.data;
         }
-      : undefined;
-
-    if (runtime) {
-      runtime.context = ctx;
-      runtime.data = data;
-      for (let i = 0; i < runtime.pluginContext.prePluginFuncs!.length; i++) {
-        await runtime.pluginContext.prePluginFuncs![i](pluginContext);
-        data = runtime.data;
       }
     }
     await userFunction(ctx, data);
-    if (runtime) {
-      runtime.context = ctx;
-      runtime.data = data;
-      for (let i = 0; i < runtime.pluginContext.postPluginFuncs!.length; i++) {
-        await runtime.pluginContext.postPluginFuncs![i](pluginContext);
-        data = runtime.data;
+    if (context.postPlugins) {
+      for (let i = 0; i < context.postPlugins!.length; i++) {
+        const p = context.pluginMap?.get(context.postPlugins![i]);
+        if (p) {
+          await p.execPostHook(runtime, context.pluginMap!);
+          data = runtime.data;
+        }
       }
     }
   };

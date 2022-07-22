@@ -30,6 +30,18 @@ export interface OpenFunctionContext {
    * Optional output binding object.
    */
   outputs?: OpenFunctionBinding;
+  /**
+   * Optional pre function exec plugins.
+   */
+  prePlugins?: Array<string>;
+  /**
+   * Optional post function exec plugins.
+   */
+  postPlugins?: Array<string>;
+  /**
+   * the map of plugin name & class.
+   */
+  pluginMap?: Map<string, Plugin>;
 }
 
 /**
@@ -138,4 +150,68 @@ export class ContextUtils {
   static IsPubSubComponent(component: OpenFunctionComponent): boolean {
     return component?.componentType.split('.')[0] === ComponentType.PubSub;
   }
+}
+
+/**
+ * The OpenFunction's plugin template.
+ * @public
+ */
+export class Plugin {
+  /**
+   * The plugin init method.
+   * @method
+   */
+  async init() {
+    console.log('init');
+  }
+  /**
+   * The plugin pre hook.
+   * @method
+   */
+  async execPreHook(ctx: PluginContextRuntime, plugins: Map<string, Plugin>) {
+    console.log(ctx, plugins);
+  }
+  /**
+   * The plugin post hook.
+   * @method
+   */
+  async execPostHook(ctx: PluginContextRuntime, plugins: Map<string, Plugin>) {
+    console.log(ctx, plugins);
+  }
+  /**
+   * get plugin filed.
+   * @method
+   */
+  get(filedName: string) {
+    return filedName;
+  }
+  /**
+   * get plugin name.
+   * @method
+   */
+  pluginName(): string {
+    return '';
+  }
+  /**
+   * get plugin version.
+   * @method
+   */
+  pluginVersion(): string {
+    return '';
+  }
+}
+
+/**
+ * The OpenFunction's plugin  context runtime.
+ * @public
+ */
+export interface PluginContextRuntime {
+  /**
+   * OpenFunctionRuntime.
+   */
+  context: OpenFunctionContext;
+  /**
+   * data.
+   */
+  data: object;
 }

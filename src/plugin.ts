@@ -1,11 +1,18 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import {PluginContext} from './plugin_context';
-
+import {OpenFunctionContext, Plugin} from './openfunction/function_context';
+import {forEach} from 'lodash';
 export async function loadPlugins(
-  codeLocation: string
-): Promise<Map<string, Function>> {
-  const funcMap: Map<string, Function> = new Map();
+  codeLocation: string,
+  context: OpenFunctionContext
+): Promise<Map<string, Plugin>> {
+  const pluginMap: Map<string, Plugin> = new Map();
+  if (!context) {
+    return pluginMap;
+  }
+  if (!context.prePlugins && !context.postPlugins) {
+    return pluginMap;
+  }
   const param = path.resolve(`${codeLocation}/plugins`);
   const plugin_files: Array<string> = [];
   const files = fs.readdirSync(param);
@@ -14,51 +21,43 @@ export async function loadPlugins(
       plugin_files.push(path.join(param, f));
     }
   });
+  const set = new Set();
+  if (context.prePlugins) {
+    forEach(context.prePlugins, value => {
+      set.add(value);
+    });
+  }
+  if (context.postPlugins) {
+    forEach(context.postPlugins, value => {
+      set.add(value);
+    });
+  }
   console.log(plugin_files);
   plugin_files.forEach(f => {
-    const pluginModule = require(f);
-    Object.keys(pluginModule).forEach(key => {
-      funcMap.set(key, pluginModule[key]);
+    try {
+      const pluginModule = require(f);
+      const p = new pluginModule();
+      if (
+        p.pluginName &&
+        p.pluginVersion &&
+        p.get &&
+        p.execPreHook &&
+        p.execPostHook &&
+        p.init &&
+        set.has(p.pluginName())
+      ) {
+        pluginMap.set(p.pluginName(), p as Plugin);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  });
+  try {
+    pluginMap.forEach(async item => {
+      await item.init();
     });
-  });
-  return funcMap;
-}
-
-export async function getPlugins(
-  codeLocation: string,
-  pluginContext: PluginContext
-): Promise<PluginContext> {
-  const funcMapResult: Map<string, Function> = new Map();
-  const funcMap = await loadPlugins(codeLocation);
-  pluginContext.pluginMap = funcMap;
-  pluginContext.prePluginFuncs = [];
-  pluginContext.postPluginFuncs = [];
-  pluginContext.prePlugins.forEach(p => {
-    const func = funcMap.get(p);
-    if (func) {
-      funcMapResult.set(p, func);
-      pluginContext.prePluginFuncs!.push(func);
-    } else {
-      console.error('----------------error----------------');
-      console.error(
-        `pre-plugin-function[${p}] is not found  \nDid you specify the correct target plugin-function to execute?`
-      );
-      console.error('-------------------------------------');
-    }
-  });
-  pluginContext.postPlugins.forEach(p => {
-    const func = funcMap.get(p);
-    if (func) {
-      funcMapResult.set(p, func);
-      pluginContext.postPluginFuncs!.push(func);
-    } else {
-      console.error('----------------error----------------');
-      console.error(
-        `post-plugin-function[${p}] is not found  \nDid you specify the correct target plugin-function to execute?`
-      );
-      console.error('-------------------------------------');
-    }
-  });
-
-  return pluginContext;
+  } catch (error) {
+    console.error(error);
+  }
+  return pluginMap;
 }

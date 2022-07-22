@@ -19,7 +19,6 @@ import * as minimist from 'minimist';
 
 import {SignatureType, isValidSignatureType} from './types';
 import {OpenFunctionContext} from './openfunction/function_context';
-import {PluginContext} from './plugin_context';
 
 const debug = Debug('common:options');
 
@@ -54,10 +53,6 @@ export interface FrameworkOptions {
    * The context to use for the function when serving.
    */
   context?: OpenFunctionContext;
-  /**
-   * The context to use for the function when serving.
-   */
-  plugin?: PluginContext;
   /**
    * Whether or not the --help CLI flag was provided.
    */
@@ -139,23 +134,6 @@ const FunctionContextOption = new ConfigurableOption(
     }
   }
 );
-const PluginContextOption = new ConfigurableOption(
-  'plugin',
-  'PLUGIN_CONTEXT',
-  undefined,
-  x => {
-    // Try to parse plugin string
-    debug('ℹ️ Plugin loaded: %s', x);
-
-    try {
-      const context = JSON.parse(x);
-      return context as PluginContext;
-    } catch (e) {
-      debug('Failed to parse plugin: %s', e);
-      return undefined;
-    }
-  }
-);
 export const helpText = `Example usage:
   functions-framework --target=helloWorld --port=8080
 Documentation:
@@ -179,7 +157,6 @@ export const parseOptions = (
       SignatureOption.cliOption,
       SourceLocationOption.cliOption,
       FunctionContextOption.cliOption,
-      PluginContextOption.cliOption,
     ],
   });
   return {
@@ -188,7 +165,6 @@ export const parseOptions = (
     sourceLocation: SourceLocationOption.parse(argv, envVars),
     signatureType: SignatureOption.parse(argv, envVars),
     context: FunctionContextOption.parse(argv, envVars),
-    plugin: PluginContextOption.parse(argv, envVars),
     printHelp: cliArgs[2] === '-h' || cliArgs[2] === '--help',
   };
 };
