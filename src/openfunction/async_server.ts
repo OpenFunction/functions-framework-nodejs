@@ -7,7 +7,6 @@ import {
   OpenFunctionContext,
   ContextUtils,
   PluginContextRuntime,
-  Plugin,
 } from './function_context';
 import {OpenFunctionRuntime} from './function_runtime';
 
