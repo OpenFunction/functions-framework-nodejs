@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-properties */
-import {deepStrictEqual, ifError, ok} from 'assert';
+import {deepStrictEqual, ifError} from 'assert';
 import {createServer} from 'net';
 
 import {get, isEmpty} from 'lodash';
