@@ -16,7 +16,7 @@
 
 // Functions framework entry point that configures and starts Node.js server
 // that runs user's code on HTTP request.
-import {getUserFunction} from './loader';
+import {getUserFunction, getUserPlugins} from './loader';
 import {ErrorHandler} from './invoker';
 import {getServer} from './server';
 import {parseOptions, helpText, OptionsError} from './options';
@@ -26,7 +26,6 @@ import {
   OpenFunctionContext,
   ContextUtils,
 } from './openfunction/function_context';
-import {loadPlugins} from './plugin';
 
 /**
  * Main entrypoint for the functions framework that loads the user's function
@@ -40,6 +39,7 @@ export const main = async () => {
       console.error(helpText);
       return;
     }
+
     const loadedFunction = await getUserFunction(
       options.sourceLocation,
       options.target,
@@ -51,19 +51,17 @@ export const main = async () => {
       process.exit(1);
     }
     const {userFunction, signatureType} = loadedFunction;
-    if (options.context) {
-      options.context.pluginMap = await loadPlugins(
-        options.sourceLocation,
-        options.context
-      );
-    }
+
     if (ContextUtils.IsAsyncRuntime(options.context as OpenFunctionContext)) {
       options.context!.port = options.port;
       const server = getAysncServer(
         userFunction! as OpenFunction,
         options.context!
       );
-      await server.start();
+      server.start().then(async () => {
+        // load and instance Plugins
+        await getUserPlugins(options);
+      });
     } else {
       const server = getServer(userFunction!, signatureType, options.context);
       const errorHandler = new ErrorHandler(server);

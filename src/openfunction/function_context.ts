@@ -1,3 +1,5 @@
+import {OpenFunctionRuntime} from './function_runtime';
+
 /**
  * The OpenFunction's serving context.
  * @public
@@ -33,15 +35,11 @@ export interface OpenFunctionContext {
   /**
    * Optional pre function exec plugins.
    */
-  prePlugins?: Array<string>;
+  prePlugins?: Array<string | Plugin | undefined>;
   /**
    * Optional post function exec plugins.
    */
-  postPlugins?: Array<string>;
-  /**
-   * the map of plugin name & class.
-   */
-  pluginMap?: Map<string, Plugin>;
+  postPlugins?: Array<string | Plugin | undefined>;
 }
 
 /**
@@ -158,60 +156,25 @@ export class ContextUtils {
  */
 export class Plugin {
   /**
-   * The plugin init method.
-   * @method
+   * pre main function exec.
+   * @param ctx - The openfunction runtime .
    */
-  async init() {
-    console.log('init');
+  public async execPreHook(ctx?: OpenFunctionRuntime) {
+    console.log(ctx);
   }
   /**
-   * The plugin pre hook.
-   * @method
+   * post main function exec.
+   * @param ctx - The openfunction runtime .
    */
-  async execPreHook(ctx: PluginContextRuntime, plugins: Map<string, Plugin>) {
-    console.log(ctx, plugins);
+  public async execPostHook(ctx?: OpenFunctionRuntime) {
+    console.log(ctx);
   }
   /**
-   * The plugin post hook.
-   * @method
+   * get instance filed value.
+   * @param filedName - the instace filedName
+   * @returns filed value.
    */
-  async execPostHook(ctx: PluginContextRuntime, plugins: Map<string, Plugin>) {
-    console.log(ctx, plugins);
-  }
-  /**
-   * get plugin filed.
-   * @method
-   */
-  get(filedName: string) {
+  public get(filedName: string) {
     return filedName;
   }
-  /**
-   * get plugin name.
-   * @method
-   */
-  pluginName(): string {
-    return '';
-  }
-  /**
-   * get plugin version.
-   * @method
-   */
-  pluginVersion(): string {
-    return '';
-  }
-}
-
-/**
- * The OpenFunction's plugin  context runtime.
- * @public
- */
-export interface PluginContextRuntime {
-  /**
-   * OpenFunctionRuntime.
-   */
-  context: OpenFunctionContext;
-  /**
-   * data.
-   */
-  data: object;
 }

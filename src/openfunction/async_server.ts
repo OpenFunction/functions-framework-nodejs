@@ -3,11 +3,7 @@ import {DaprServer} from '@dapr/dapr';
 
 import {OpenFunction} from '../functions';
 
-import {
-  OpenFunctionContext,
-  ContextUtils,
-  PluginContextRuntime,
-} from './function_context';
+import {OpenFunctionContext, ContextUtils} from './function_context';
 import {OpenFunctionRuntime} from './function_runtime';
 
 export type AsyncFunctionServer = DaprServer;
@@ -27,28 +23,29 @@ export default function (
   const ctx = OpenFunctionRuntime.ProxyContext(context);
 
   const wrapper = async (data: object) => {
-    const runtime: PluginContextRuntime = {
-      context: context,
-      data: data,
-    };
-    if (context.prePlugins) {
-      for (let i = 0; i < context.prePlugins!.length; i++) {
-        const p = context.pluginMap?.get(context.prePlugins![i]);
-        if (p) {
-          await p.execPreHook(runtime, context.pluginMap!);
-          data = runtime.data;
+    try {
+      // exec pre hooks
+      if (context.prePlugins) {
+        for (const p of context.prePlugins) {
+          if (p && typeof p === 'object') {
+            typeof p.execPreHook === 'function' && (await p.execPreHook(ctx));
+          }
         }
       }
-    }
-    await userFunction(ctx, data);
-    if (context.postPlugins) {
-      for (let i = 0; i < context.postPlugins!.length; i++) {
-        const p = context.pluginMap?.get(context.postPlugins![i]);
-        if (p) {
-          await p.execPostHook(runtime, context.pluginMap!);
-          data = runtime.data;
+
+      await userFunction(ctx, data);
+
+      // exec post hooks
+      if (context.postPlugins) {
+        for (const p of context.postPlugins) {
+          if (p && typeof p === 'object') {
+            typeof p.execPostHook === 'function' && (await p.execPostHook(ctx));
+          }
         }
       }
+    } catch (error) {
+      // if don't catch error process will down
+      console.error(error);
     }
   };
 

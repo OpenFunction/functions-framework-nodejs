@@ -125,6 +125,78 @@ describe('parseOptions', () => {
         printHelp: false,
       },
     },
+    {
+      name: 'respects all env vars',
+      cliOpts: ['bin/node', '/index.js'],
+      envVars: {
+        PORT: '1234',
+        FUNCTION_TARGET: 'helloWorld',
+        FUNCTION_SIGNATURE_TYPE: 'cloudevent',
+        FUNCTION_SOURCE: '/source',
+        FUNC_CONTEXT:
+          '{ "name": "foo", "version": "1.0.0", "runtime": "Knative" }',
+      },
+      expectedOptions: {
+        port: '1234',
+        target: 'helloWorld',
+        sourceLocation: resolve('/source'),
+        signatureType: 'cloudevent',
+        context: {name: 'foo', version: '1.0.0', runtime: 'Knative'},
+        printHelp: false,
+      },
+    },
+    {
+      name: 'respects all env vars with empty plugins',
+      cliOpts: ['bin/node', '/index.js'],
+      envVars: {
+        PORT: '1234',
+        FUNCTION_TARGET: 'helloWorld',
+        FUNCTION_SIGNATURE_TYPE: 'cloudevent',
+        FUNCTION_SOURCE: '/source',
+        FUNC_CONTEXT:
+          '{ "name": "foo", "version": "1.0.0", "runtime": "Knative", "prePlugins": [] , "postPlugins": []}',
+      },
+      expectedOptions: {
+        port: '1234',
+        target: 'helloWorld',
+        sourceLocation: resolve('/source'),
+        signatureType: 'cloudevent',
+        context: {
+          name: 'foo',
+          version: '1.0.0',
+          runtime: 'Knative',
+          prePlugins: [],
+          postPlugins: [],
+        },
+        printHelp: false,
+      },
+    },
+    {
+      name: 'respects all env vars with  plugins',
+      cliOpts: ['bin/node', '/index.js'],
+      envVars: {
+        PORT: '1234',
+        FUNCTION_TARGET: 'helloWorld',
+        FUNCTION_SIGNATURE_TYPE: 'cloudevent',
+        FUNCTION_SOURCE: '/source',
+        FUNC_CONTEXT:
+          '{ "name": "foo", "version": "1.0.0", "runtime": "Knative", "prePlugins": ["test-plugin"] , "postPlugins": ["test-plugin"]}',
+      },
+      expectedOptions: {
+        port: '1234',
+        target: 'helloWorld',
+        sourceLocation: resolve('/source'),
+        signatureType: 'cloudevent',
+        context: {
+          name: 'foo',
+          version: '1.0.0',
+          runtime: 'Knative',
+          prePlugins: ['test-plugin'],
+          postPlugins: ['test-plugin'],
+        },
+        printHelp: false,
+      },
+    },
   ];
 
   testData.forEach(testCase => {

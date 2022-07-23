@@ -21,10 +21,13 @@
 import * as path from 'path';
 import * as semver from 'semver';
 import * as readPkgUp from 'read-pkg-up';
+import * as fs from 'fs';
 import {pathToFileURL} from 'url';
 import {HandlerFunction} from './functions';
 import {SignatureType} from './types';
 import {getRegisteredFunction} from './function_registry';
+import {Plugin} from './openfunction/function_context';
+import {FrameworkOptions} from './options';
 
 // Dynamic import function required to load user code packaged as an
 // ES module is only available on Node.js v13.2.0 and up.
@@ -92,6 +95,7 @@ export async function getUserFunction(
 } | null> {
   try {
     const functionModulePath = getFunctionModulePath(codeLocation);
+    console.log(functionModulePath);
     if (functionModulePath === null) {
       console.error('Provided code is not a loadable module.');
       return null;
@@ -192,4 +196,84 @@ function getFunctionModulePath(codeLocation: string): string | null {
     }
   }
   return path;
+}
+
+/**
+ * Returns user's plugin from function file.
+ * Returns null if plugin can't be retrieved.
+ * @return User's plugins or null.
+ */
+export async function getUserPlugins(
+  options: FrameworkOptions
+): Promise<FrameworkOptions> {
+  // get plugin set
+  const pluginSet: Set<string> = new Set();
+  if (
+    options.context &&
+    options.context.prePlugins &&
+    options.context.postPlugins
+  ) {
+    options.context.prePlugins.forEach(item => {
+      typeof item === 'string' && pluginSet.add(item);
+    });
+    options.context.postPlugins.forEach(item => {
+      typeof item === 'string' && pluginSet.add(item);
+    });
+
+    try {
+      // load plugin js files
+      const instances: Map<string, Plugin> = new Map();
+      const param = path.resolve(`${options.sourceLocation}/plugins`);
+      const plugin_files: Array<string> = [];
+      const files = fs.readdirSync(param);
+
+      for (const k in files) {
+        plugin_files.push(require.resolve(path.join(param, files[k])));
+      }
+
+      // find plugins class
+      const tempMap: Map<string, any> = new Map();
+      for (const k in plugin_files) {
+        const jsMoulde = require(plugin_files[k]);
+        if (jsMoulde && jsMoulde.Name) {
+          tempMap.set(jsMoulde.Name, jsMoulde);
+        }
+      }
+
+      // instance plugin dynamic set ofn_plugin_name
+      const arr = Array.from(pluginSet.values());
+      for (const k in arr) {
+        const module = tempMap.get(arr[k]);
+        if (module) {
+          const instance = new module();
+          instance['ofn_plugin_name'] = module.Name;
+          instance['ofn_plugin_version'] = module.Version
+            ? module.Version
+            : 'v1';
+          instances.set(arr[k], instance as Plugin);
+        }
+      }
+
+      const prePlugins: Array<Plugin> = [];
+      const postPlugins: Array<Plugin> = [];
+      options.context.prePlugins.forEach(item => {
+        if (typeof item === 'string') {
+          const instance = instances.get(item);
+          typeof instance === 'object' && prePlugins.push(instance);
+        }
+      });
+      options.context.postPlugins.forEach(item => {
+        if (typeof item === 'string') {
+          const instance = instances.get(item);
+          typeof instance === 'object' && postPlugins.push(instance);
+        }
+      });
+
+      options.context.prePlugins = prePlugins;
+      options.context.postPlugins = postPlugins;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  return options;
 }

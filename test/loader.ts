@@ -18,6 +18,7 @@ import * as semver from 'semver';
 import * as functions from '../src/functions';
 import * as loader from '../src/loader';
 import * as FunctionRegistry from '../src/function_registry';
+import {FrameworkOptions} from '../src/options';
 
 describe('loading function', () => {
   interface TestData {
@@ -129,5 +130,209 @@ describe('loading function', () => {
       'http'
     );
     assert.strictEqual(loadedFunction?.signatureType, 'cloudevent');
+  });
+});
+
+describe('loading plugins', () => {
+  interface ExceptData {
+    prePlugins: Array<string>;
+    postPlugins: Array<string>;
+  }
+  const ofn_plugin_name = 'ofn_plugin_name';
+  const ofn_plugin_version = 'ofn_plugin_version';
+  interface TestData {
+    options: FrameworkOptions;
+    except: ExceptData;
+  }
+  const testData: TestData[] = [
+    {
+      options: {
+        port: '8080',
+        target: 'helloWorld',
+        sourceLocation: process.cwd() + '/test/data',
+        signatureType: 'event',
+        printHelp: false,
+        context: {
+          name: 'demo',
+          version: '',
+          runtime: 'ASYNC',
+          prePlugins: ['demo-plugin'],
+          postPlugins: ['demo-plugin'],
+        },
+      },
+      except: {
+        prePlugins: ['demo-plugin'],
+        postPlugins: ['demo-plugin'],
+      },
+    },
+    {
+      options: {
+        port: '8080',
+        target: 'helloWorld',
+        sourceLocation: process.cwd() + '/test/data',
+        signatureType: 'event',
+        printHelp: false,
+        context: {
+          name: 'demo',
+          version: '',
+          runtime: 'ASYNC',
+          prePlugins: ['demo-plugin'],
+          postPlugins: [],
+        },
+      },
+      except: {
+        prePlugins: ['demo-plugin'],
+        postPlugins: [],
+      },
+    },
+    {
+      options: {
+        port: '8080',
+        target: 'helloWorld',
+        sourceLocation: process.cwd() + '/test/data',
+        signatureType: 'event',
+        printHelp: false,
+        context: {
+          name: 'demo',
+          version: '',
+          runtime: 'ASYNC',
+          prePlugins: [],
+          postPlugins: [],
+        },
+      },
+      except: {
+        prePlugins: [],
+        postPlugins: [],
+      },
+    },
+    {
+      options: {
+        port: '8080',
+        target: 'helloWorld',
+        sourceLocation: process.cwd() + '/test/data',
+        signatureType: 'event',
+        printHelp: false,
+        context: {
+          name: 'error',
+          version: '',
+          runtime: 'ASYNC',
+          prePlugins: ['error-plugin'],
+          postPlugins: ['error-plugin'],
+        },
+      },
+      except: {
+        prePlugins: [],
+        postPlugins: [],
+      },
+    },
+    {
+      options: {
+        port: '8080',
+        target: 'helloWorld',
+        sourceLocation: process.cwd() + '/test/data',
+        signatureType: 'event',
+        printHelp: false,
+        context: {
+          name: 'error',
+          version: '',
+          runtime: 'ASYNC',
+          prePlugins: ['error-miss-version-plugin'],
+          postPlugins: ['error-miss-version-plugin'],
+        },
+      },
+      except: {
+        prePlugins: ['error-miss-version-plugin'],
+        postPlugins: ['error-miss-version-plugin'],
+      },
+    },
+  ];
+
+  it('load exits plugins', async () => {
+    for (const test of testData) {
+      const options = await loader.getUserPlugins(test.options);
+      const current: ExceptData = {
+        prePlugins: [],
+        postPlugins: [],
+      };
+
+      options.context!.prePlugins!.forEach(item => {
+        assert(typeof item === 'object');
+        assert(item.get(ofn_plugin_version) === 'v1');
+        current.prePlugins.push(item.get(ofn_plugin_name));
+      });
+      options.context!.postPlugins!.forEach(item => {
+        assert(typeof item === 'object');
+        assert(item.get(ofn_plugin_version) === 'v1');
+        current.postPlugins.push(item.get(ofn_plugin_name));
+      });
+
+      assert.deepStrictEqual(current, test.except);
+    }
+  });
+  const test: TestData = {
+    options: {
+      port: '8080',
+      target: 'helloWorld',
+      sourceLocation: process.cwd() + '/test/data',
+      signatureType: 'event',
+      printHelp: false,
+      context: {
+        name: 'error',
+        version: '',
+        runtime: 'ASYNC',
+        prePlugins: [''],
+        postPlugins: [''],
+      },
+    },
+    except: {
+      prePlugins: [''],
+      postPlugins: [''],
+    },
+  };
+  function copyAndSet(name: string): TestData {
+    const data: TestData = JSON.parse(JSON.stringify(test));
+    data.options.context!.prePlugins![0] = name;
+    data.options.context!.postPlugins![0] = name;
+    data.except.postPlugins[0] = name;
+    data.except.prePlugins[0] = name;
+    return data;
+  }
+  it('user plugin miss prehook', async () => {
+    const data = copyAndSet('error-error-miss-pre-plugin');
+    const options = await loader.getUserPlugins(data.options);
+    assert.throws(() => {
+      assert(options.context!.prePlugins!.length === 1);
+      assert(typeof options.context!.prePlugins![0] === 'object');
+      options.context!.prePlugins![0].execPreHook();
+    });
+  });
+  it('user plugin miss posthook', async () => {
+    const data = copyAndSet('error-error-miss-post-plugin');
+    const options = await loader.getUserPlugins(data.options);
+    assert.throws(() => {
+      assert(options.context!.prePlugins!.length === 1);
+      assert(typeof options.context!.prePlugins![0] === 'object');
+      options.context!.prePlugins![0].execPostHook();
+    });
+  });
+  it('user plugin miss get', async () => {
+    const data = copyAndSet('error-error-miss-post-plugin');
+    const options = await loader.getUserPlugins(data.options);
+    assert.throws(() => {
+      assert(options.context!.prePlugins!.length === 1);
+      assert(typeof options.context!.prePlugins![0] === 'object');
+      options.context!.prePlugins![0].get('');
+    });
+  });
+  it('user plugin miss all', async () => {
+    const data = copyAndSet('error-error-miss-all-plugin');
+    const options = await loader.getUserPlugins(data.options);
+    assert.throws(() => {
+      assert(options.context!.prePlugins!.length === 1);
+      assert(typeof options.context!.prePlugins![0] === 'object');
+      options.context!.prePlugins![0].get('');
+      options.context!.prePlugins![0].execPostHook();
+      options.context!.prePlugins![0].execPreHook();
+    });
   });
 });

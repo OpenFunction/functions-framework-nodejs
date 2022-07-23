@@ -136,6 +136,8 @@ export interface OpenFunctionContext {
     name: string;
     outputs?: OpenFunctionBinding;
     port?: string;
+    postPlugins?: Array<string | Plugin_2 | undefined>;
+    prePlugins?: Array<string | Plugin_2 | undefined>;
     runtime: `${RuntimeType}` | `${Capitalize<RuntimeType>}` | `${Uppercase<RuntimeType>}`;
     version: string;
 }
@@ -157,6 +159,14 @@ export abstract class OpenFunctionRuntime {
     // Warning: (ae-forgotten-export) The symbol "OpenFunctionTrigger" needs to be exported by the entry point index.d.ts
     protected trigger?: OpenFunctionTrigger;
 }
+
+// @public
+class Plugin_2 {
+    execPostHook(ctx?: OpenFunctionRuntime): Promise<void>;
+    execPreHook(ctx?: OpenFunctionRuntime): Promise<void>;
+    get(filedName: string): string;
+}
+export { Plugin_2 as Plugin }
 
 // @public (undocumented)
 interface Request_2 extends Request_3 {

@@ -1,0 +1,33 @@
+const { resolve } = require("path")
+
+class DemoPlugin{
+    static Version = "v1"
+    static Name = "demo-plugin"
+    id = '666'
+    constructor(){
+        console.log(`init demo plugins`)
+    }
+    sleep(){
+        return new Promise(resolve => setTimeout(resolve,3000));
+    }
+    async execPreHook(ctx){
+        console.log(`-----------demo plugin pre hook-----------`)
+        ctx['pre'] = 'pre-exec';
+        await this.sleep()
+        console.log(`-----------sleep 3----------`)
+    }
+    execPostHook(ctx){
+        console.log(`-----------demo plugin post hook-----------`)
+        ctx['post'] = 'post-exec';
+        console.log(`-----------send post-----------`)
+    }
+    get(filedName){
+        for(let key in this){
+            if(key === filedName){
+                return this[key]
+            }
+        }
+    }
+}
+
+module.exports = DemoPlugin;
