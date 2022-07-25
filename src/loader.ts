@@ -248,9 +248,7 @@ export async function getUserPlugins(
         if (module) {
           const instance = new module();
           instance['ofn_plugin_name'] = module.Name;
-          instance['ofn_plugin_version'] = module.Version
-            ? module.Version
-            : 'v1';
+          instance['ofn_plugin_version'] = module.Version || 'v1';
 
           //set default method of pre post get
           if (!instance.execPreHook) {
