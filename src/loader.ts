@@ -222,8 +222,9 @@ export async function getUserPlugins(
     }
 
     try {
+      type Instance = Record<string, Plugin>;
       // load plugin js files
-      const instances: Map<string, Plugin> = new Map();
+      const instances: Instance = {};
       const param = path.resolve(`${options.sourceLocation}/plugins`);
       const plugin_files: Array<string> = [];
       const files = fs.readdirSync(param);
@@ -233,18 +234,19 @@ export async function getUserPlugins(
       }
 
       // find plugins class
-      const tempMap: Map<string, any> = new Map();
+      type PluginClass = Record<string, any>;
+      const tempMap: PluginClass = {};
       for (const k in plugin_files) {
         const jsMoulde = require(plugin_files[k]);
         if (jsMoulde && jsMoulde.Name) {
-          tempMap.set(jsMoulde.Name, jsMoulde);
+          tempMap[jsMoulde.Name] = jsMoulde;
         }
       }
 
       // instance plugin dynamic set ofn_plugin_name
       const arr = Array.from(pluginSet.values());
       for (const k in arr) {
-        const module = tempMap.get(arr[k]);
+        const module = tempMap[arr[k]];
         if (module) {
           const instance = new module();
           instance['ofn_plugin_name'] = module.Name;
@@ -270,7 +272,7 @@ export async function getUserPlugins(
               }
             };
           }
-          instances.set(arr[k], instance as Plugin);
+          instances[arr[k]] = instance as Plugin;
         }
       }
 
@@ -279,7 +281,7 @@ export async function getUserPlugins(
       if (options.context.prePlugins) {
         forEach(options.context.prePlugins, plugin => {
           if (typeof plugin === 'string') {
-            const instance = instances.get(plugin);
+            const instance = instances[plugin];
             typeof instance === 'object' && prePlugins.push(instance);
           }
         });
@@ -287,7 +289,7 @@ export async function getUserPlugins(
       if (options.context.postPlugins) {
         forEach(options.context.postPlugins, plugin => {
           if (typeof plugin === 'string') {
-            const instance = instances.get(plugin);
+            const instance = instances[plugin];
             typeof instance === 'object' && postPlugins.push(instance);
           }
         });

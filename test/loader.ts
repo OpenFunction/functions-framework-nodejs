@@ -269,6 +269,7 @@ describe('loading plugins', () => {
       assert.deepStrictEqual(current, test.except);
     }
   });
+
   const test: TestData = {
     options: {
       port: '8080',
@@ -289,6 +290,7 @@ describe('loading plugins', () => {
       postPlugins: [''],
     },
   };
+
   function copyAndSet(name: string): TestData {
     const data: TestData = JSON.parse(JSON.stringify(test));
     data.options.context!.prePlugins![0] = name;
@@ -297,33 +299,7 @@ describe('loading plugins', () => {
     data.except.prePlugins[0] = name;
     return data;
   }
-  it('user plugin miss prehook', async () => {
-    const data = copyAndSet('error-error-miss-pre-plugin');
-    const options = await loader.getUserPlugins(data.options);
-    assert.throws(() => {
-      assert(options.context!.prePlugins!.length === 1);
-      assert(typeof options.context!.prePlugins![0] === 'object');
-      options.context!.prePlugins![0].execPreHook();
-    });
-  });
-  it('user plugin miss posthook', async () => {
-    const data = copyAndSet('error-error-miss-post-plugin');
-    const options = await loader.getUserPlugins(data.options);
-    assert.throws(() => {
-      assert(options.context!.prePlugins!.length === 1);
-      assert(typeof options.context!.prePlugins![0] === 'object');
-      options.context!.prePlugins![0].execPostHook();
-    });
-  });
-  it('user plugin miss get', async () => {
-    const data = copyAndSet('error-error-miss-post-plugin');
-    const options = await loader.getUserPlugins(data.options);
-    assert.throws(() => {
-      assert(options.context!.prePlugins!.length === 1);
-      assert(typeof options.context!.prePlugins![0] === 'object');
-      options.context!.prePlugins![0].get('');
-    });
-  });
+
   it('user plugin miss all', async () => {
     const data = copyAndSet('error-miss-all-plugin');
     const options = await loader.getUserPlugins(data.options);
