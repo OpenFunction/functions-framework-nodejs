@@ -325,14 +325,14 @@ describe('loading plugins', () => {
     });
   });
   it('user plugin miss all', async () => {
-    const data = copyAndSet('error-error-miss-all-plugin');
+    const data = copyAndSet('error-miss-all-plugin');
     const options = await loader.getUserPlugins(data.options);
-    assert.throws(() => {
-      assert(options.context!.prePlugins!.length === 1);
-      assert(typeof options.context!.prePlugins![0] === 'object');
-      options.context!.prePlugins![0].get('');
-      options.context!.prePlugins![0].execPostHook();
-      options.context!.prePlugins![0].execPreHook();
-    });
+    assert(typeof options.context!.prePlugins![0] === 'object');
+    assert(
+      options.context!.prePlugins![0].get('ofn_plugin_name') ===
+        'error-miss-all-plugin'
+    );
+    assert(options.context!.prePlugins![0].execPreHook);
+    assert(options.context!.prePlugins![0].execPostHook);
   });
 });

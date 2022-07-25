@@ -23,11 +23,12 @@ import * as semver from 'semver';
 import * as readPkgUp from 'read-pkg-up';
 import * as fs from 'fs';
 import {pathToFileURL} from 'url';
-import {HandlerFunction} from './functions';
+import {HandlerFunction, OpenFunctionRuntime} from './functions';
 import {SignatureType} from './types';
 import {getRegisteredFunction} from './function_registry';
 import {Plugin} from './openfunction/function_context';
 import {FrameworkOptions} from './options';
+import {forEach} from 'lodash';
 
 // Dynamic import function required to load user code packaged as an
 // ES module is only available on Node.js v13.2.0 and up.
@@ -95,7 +96,7 @@ export async function getUserFunction(
 } | null> {
   try {
     const functionModulePath = getFunctionModulePath(codeLocation);
-    console.log(functionModulePath);
+
     if (functionModulePath === null) {
       console.error('Provided code is not a loadable module.');
       return null;
@@ -208,17 +209,17 @@ export async function getUserPlugins(
 ): Promise<FrameworkOptions> {
   // get plugin set
   const pluginSet: Set<string> = new Set();
-  if (
-    options.context &&
-    options.context.prePlugins &&
-    options.context.postPlugins
-  ) {
-    options.context.prePlugins.forEach(item => {
-      typeof item === 'string' && pluginSet.add(item);
-    });
-    options.context.postPlugins.forEach(item => {
-      typeof item === 'string' && pluginSet.add(item);
-    });
+  if (options.context) {
+    if (options.context.prePlugins) {
+      forEach(options.context.prePlugins, plugin => {
+        typeof plugin === 'string' && pluginSet.add(plugin);
+      });
+    }
+    if (options.context.postPlugins) {
+      forEach(options.context.postPlugins, plugin => {
+        typeof plugin === 'string' && pluginSet.add(plugin);
+      });
+    }
 
     try {
       // load plugin js files
@@ -250,24 +251,49 @@ export async function getUserPlugins(
           instance['ofn_plugin_version'] = module.Version
             ? module.Version
             : 'v1';
+
+          //set default method of pre post get
+          if (!instance.execPreHook) {
+            instance.execPreHook = (ctx?: OpenFunctionRuntime) => {
+              console.log(ctx);
+            };
+          }
+          if (!instance.execPostHook) {
+            instance.execPostHook = (ctx?: OpenFunctionRuntime) => {
+              console.log(ctx);
+            };
+          }
+          if (!instance.get) {
+            instance.get = (filedName: string) => {
+              for (const key in instance) {
+                if (key === filedName) {
+                  return instance[key];
+                }
+              }
+            };
+          }
           instances.set(arr[k], instance as Plugin);
         }
       }
 
       const prePlugins: Array<Plugin> = [];
       const postPlugins: Array<Plugin> = [];
-      options.context.prePlugins.forEach(item => {
-        if (typeof item === 'string') {
-          const instance = instances.get(item);
-          typeof instance === 'object' && prePlugins.push(instance);
-        }
-      });
-      options.context.postPlugins.forEach(item => {
-        if (typeof item === 'string') {
-          const instance = instances.get(item);
-          typeof instance === 'object' && postPlugins.push(instance);
-        }
-      });
+      if (options.context.prePlugins) {
+        forEach(options.context.prePlugins, plugin => {
+          if (typeof plugin === 'string') {
+            const instance = instances.get(plugin);
+            typeof instance === 'object' && prePlugins.push(instance);
+          }
+        });
+      }
+      if (options.context.postPlugins) {
+        forEach(options.context.postPlugins, plugin => {
+          if (typeof plugin === 'string') {
+            const instance = instances.get(plugin);
+            typeof instance === 'object' && postPlugins.push(instance);
+          }
+        });
+      }
 
       options.context.prePlugins = prePlugins;
       options.context.postPlugins = postPlugins;

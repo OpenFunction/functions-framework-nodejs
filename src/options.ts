@@ -134,6 +134,7 @@ const FunctionContextOption = new ConfigurableOption(
     }
   }
 );
+
 export const helpText = `Example usage:
   functions-framework --target=helloWorld --port=8080
 Documentation:
