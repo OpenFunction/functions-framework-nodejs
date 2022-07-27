@@ -6,7 +6,6 @@ import {get, isEmpty} from 'lodash';
 import * as shell from 'shelljs';
 import * as MQTT from 'aedes';
 
-// import {OpenFunctionContext} from '../../src/openfunction/function_context';
 import getAysncServer from '../../src/openfunction/async_server';
 
 import {
