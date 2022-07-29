@@ -13,7 +13,7 @@
     "./testing": "./build/src/testing.js"
   },
   "dependencies": {
-    "@dapr/dapr": "2.2.1",
+    "@dapr/dapr": "2.3.1",
     "body-parser": "^1.20.0",
     "cloudevents": "^6.0.2",
     "debug": "^4.3.4",
