@@ -26,7 +26,7 @@ import {
   ContextUtils,
 } from './openfunction/function_context';
 
-import {getUserFunction} from './loader';
+import {getUserFunction, getUserPlugins} from './loader';
 import {ErrorHandler} from './invoker';
 import {getServer} from './server';
 import {parseOptions, helpText, OptionsError} from './options';
@@ -69,6 +69,9 @@ export const main = async () => {
 
       // DaprServer uses httpTerminator in server.stop()
       handleShutdown(async () => await server.stop());
+
+      // Load Plugins
+      await getUserPlugins(options);
     }
     // Then taking sync runtime as the fallback
     else {
