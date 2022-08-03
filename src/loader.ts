@@ -199,6 +199,7 @@ function getFunctionModulePath(codeLocation: string): string | null {
   return path;
 }
 
+type PluginClass = Record<string, any>;
 /**
  * Returns user's plugin from function file.
  * Returns null if plugin can't be retrieved.
@@ -235,15 +236,10 @@ export async function getUserPlugins(
       }
 
       // Find plugins class
-      type PluginClass = Record<string, any>;
       const tempMap: PluginClass = {};
       for (const pluginFile of pluginFiles) {
         const jsMoulde = require(pluginFile);
-        for (const pluginClass in jsMoulde) {
-          if (jsMoulde[pluginClass].Name) {
-            tempMap[jsMoulde[pluginClass].Name] = jsMoulde[pluginClass];
-          }
-        }
+        processJsModule(jsMoulde, tempMap);
       }
 
       // Instance plugin dynamic set ofn_plugin_name
@@ -335,4 +331,38 @@ function getPluginFiles(codeLocation: string): Array<string> | null {
     return null;
   }
   return pluginFiles;
+}
+/**
+ * Returns rdetermine whether it is a class.
+ * Returns boolean is can be class
+ * @param obj jsmodule.
+ * @return boolean of it is a class.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function couldBeClass(obj: any): boolean {
+  return (
+    typeof obj === 'function' &&
+    obj.prototype !== undefined &&
+    obj.prototype.constructor === obj &&
+    obj.toString().slice(0, 5) === 'class'
+  );
+}
+
+/**
+ * Process jsMoulde if it can be a plugin class put it into tempMap.
+ * @param obj jsmodule.
+ * @param tempMap PluginClass.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function processJsModule(obj: any, tempMap: PluginClass) {
+  if (typeof obj === 'object') {
+    for (const o in obj) {
+      if (couldBeClass(obj[o]) && obj[o].Name) {
+        tempMap[obj[o].Name] = obj[o];
+      }
+    }
+  }
+  if (couldBeClass(obj) && obj.Name) {
+    tempMap[obj.Name] = obj;
+  }
 }

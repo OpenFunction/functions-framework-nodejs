@@ -236,12 +236,12 @@ describe('loading plugins', () => {
           name: 'error',
           version: '',
           runtime: 'ASYNC',
-          prePlugins: ['error-miss-version-plugin'],
+          prePlugins: ['error-miss-version-plugin', 'demo-plugin'],
           postPlugins: ['error-miss-version-plugin'],
         },
       },
       except: {
-        prePlugins: ['error-miss-version-plugin'],
+        prePlugins: ['error-miss-version-plugin', 'demo-plugin'],
         postPlugins: ['error-miss-version-plugin'],
       },
     },
@@ -310,5 +310,24 @@ describe('loading plugins', () => {
     );
     assert(options.context!.prePlugins![0].execPreHook);
     assert(options.context!.prePlugins![0].execPostHook);
+  });
+
+  it('load multi plugins ', async () => {
+    const data: FrameworkOptions = {
+      port: '8080',
+      target: 'helloWorld',
+      sourceLocation: process.cwd() + '/test/data',
+      signatureType: 'event',
+      printHelp: false,
+      context: {
+        name: 'demo',
+        version: '',
+        runtime: 'ASYNC',
+        prePlugins: ['demo-plugin', 'error-miss-all-plugin'],
+        postPlugins: ['demo-plugin', 'error-miss-all-plugin'],
+      },
+    };
+    assert.ok(await loader.getUserPlugins(data));
+    console.log(data);
   });
 });

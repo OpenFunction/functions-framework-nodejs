@@ -3,4 +3,4 @@ class ErrorPlugin{
     static Name = "error-miss-all-plugin";
 }
 
-module.exports = {ErrorPlugin};
+module.exports = ErrorPlugin;
