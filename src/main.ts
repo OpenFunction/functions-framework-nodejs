@@ -54,14 +54,13 @@ export const main = async () => {
 
     if (ContextUtils.IsAsyncRuntime(options.context as OpenFunctionContext)) {
       options.context!.port = options.port;
+
       const server = getAysncServer(
         userFunction! as OpenFunction,
         options.context!
       );
-      server.start().then(async () => {
-        // load and instance Plugins
-        await getUserPlugins(options);
-      });
+      await server.start();
+      await getUserPlugins(options);
     } else {
       const server = getServer(userFunction!, signatureType, options.context);
       const errorHandler = new ErrorHandler(server);

@@ -19,4 +19,4 @@ class ErrorPlugin{
     }
 }
 
-module.exports = ErrorPlugin;
+module.exports = {ErrorPlugin};

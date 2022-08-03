@@ -19,6 +19,7 @@ import * as functions from '../src/functions';
 import * as loader from '../src/loader';
 import * as FunctionRegistry from '../src/function_registry';
 import {FrameworkOptions} from '../src/options';
+import {Plugin} from '../src';
 
 describe('loading function', () => {
   interface TestData {
@@ -138,8 +139,7 @@ describe('loading plugins', () => {
     prePlugins: Array<string>;
     postPlugins: Array<string>;
   }
-  const ofn_plugin_name = 'ofn_plugin_name';
-  const ofn_plugin_version = 'ofn_plugin_version';
+
   interface TestData {
     options: FrameworkOptions;
     except: ExceptData;
@@ -257,13 +257,13 @@ describe('loading plugins', () => {
 
       options.context!.prePlugins!.forEach(item => {
         assert(typeof item === 'object');
-        assert(item.get(ofn_plugin_version) === 'v1');
-        current.prePlugins.push(item.get(ofn_plugin_name));
+        assert(item.get(Plugin.OFN_PLUGIN_VERSION) === 'v1');
+        current.prePlugins.push(item.get(Plugin.OFN_PLUGIN_NAME));
       });
       options.context!.postPlugins!.forEach(item => {
         assert(typeof item === 'object');
-        assert(item.get(ofn_plugin_version) === 'v1');
-        current.postPlugins.push(item.get(ofn_plugin_name));
+        assert(item.get(Plugin.OFN_PLUGIN_VERSION) === 'v1');
+        current.postPlugins.push(item.get(Plugin.OFN_PLUGIN_NAME));
       });
 
       assert.deepStrictEqual(current, test.except);
@@ -305,7 +305,7 @@ describe('loading plugins', () => {
     const options = await loader.getUserPlugins(data.options);
     assert(typeof options.context!.prePlugins![0] === 'object');
     assert(
-      options.context!.prePlugins![0].get('ofn_plugin_name') ===
+      options.context!.prePlugins![0].get(Plugin.OFN_PLUGIN_NAME) ===
         'error-miss-all-plugin'
     );
     assert(options.context!.prePlugins![0].execPreHook);

@@ -1,4 +1,4 @@
-import {forEach} from 'lodash';
+import {forEach, invoke} from 'lodash';
 import {DaprServer} from '@dapr/dapr';
 
 import {OpenFunction} from '../functions';
@@ -23,29 +23,23 @@ export default function (
   const ctx = OpenFunctionRuntime.ProxyContext(context);
 
   const wrapper = async (data: object) => {
-    try {
-      // exec pre hooks
-      if (context.prePlugins) {
-        for (const p of context.prePlugins) {
-          if (p && typeof p === 'object') {
-            typeof p.execPreHook === 'function' && (await p.execPreHook(ctx));
-          }
-        }
-      }
+    // Exec pre hooks
+    console.log(context.prePlugins);
+    if (context.prePlugins) {
+      await context.prePlugins.reduce(async (_, current) => {
+        await invoke(current, 'execPreHook', ctx);
+        return [];
+      }, Promise.resolve([]));
+    }
 
-      await userFunction(ctx, data);
+    await userFunction(ctx, data);
 
-      // exec post hooks
-      if (context.postPlugins) {
-        for (const p of context.postPlugins) {
-          if (p && typeof p === 'object') {
-            typeof p.execPostHook === 'function' && (await p.execPostHook(ctx));
-          }
-        }
-      }
-    } catch (error) {
-      // if don't catch error process will down
-      console.error(error);
+    // Exec post hooks
+    if (context.postPlugins) {
+      await context.postPlugins.reduce(async (_, current) => {
+        await invoke(current, 'execPostHook', ctx);
+        return [];
+      }, Promise.resolve([]));
     }
   };
 

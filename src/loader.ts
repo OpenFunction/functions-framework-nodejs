@@ -207,7 +207,7 @@ function getFunctionModulePath(codeLocation: string): string | null {
 export async function getUserPlugins(
   options: FrameworkOptions
 ): Promise<FrameworkOptions> {
-  // get plugin set
+  // Get plugin set
   const pluginSet: Set<string> = new Set();
   if (options.context) {
     if (options.context.prePlugins) {
@@ -223,44 +223,53 @@ export async function getUserPlugins(
 
     try {
       type Instance = Record<string, Plugin>;
-      // load plugin js files
+      // Load plugin js files
       const instances: Instance = {};
-      const param = path.resolve(`${options.sourceLocation}/plugins`);
-      const plugin_files: Array<string> = [];
-      const files = fs.readdirSync(param);
 
-      for (const k in files) {
-        plugin_files.push(require.resolve(path.join(param, files[k])));
+      const pluginFiles = getPluginFiles(options.sourceLocation);
+      if (pluginFiles === null) {
+        console.warn('[warn-!!!] user plugins files load failed ');
+        options.context.prePlugins = [];
+        options.context.postPlugins = [];
+        return options;
       }
 
-      // find plugins class
+      // Find plugins class
       type PluginClass = Record<string, any>;
       const tempMap: PluginClass = {};
-      for (const k in plugin_files) {
-        const jsMoulde = require(plugin_files[k]);
-        if (jsMoulde && jsMoulde.Name) {
-          tempMap[jsMoulde.Name] = jsMoulde;
+      for (const pluginFile of pluginFiles) {
+        const jsMoulde = require(pluginFile);
+        for (const pluginClass in jsMoulde) {
+          if (jsMoulde[pluginClass].Name) {
+            tempMap[jsMoulde[pluginClass].Name] = jsMoulde[pluginClass];
+          }
         }
       }
 
-      // instance plugin dynamic set ofn_plugin_name
-      const arr = Array.from(pluginSet.values());
-      for (const k in arr) {
-        const module = tempMap[arr[k]];
+      // Instance plugin dynamic set ofn_plugin_name
+      const pluginNames = Array.from(pluginSet.values());
+      for (const name of pluginNames) {
+        const module = tempMap[name];
         if (module) {
           const instance = new module();
-          instance['ofn_plugin_name'] = module.Name;
-          instance['ofn_plugin_version'] = module.Version || 'v1';
+          instance[Plugin.OFN_PLUGIN_NAME] = module.Name;
+          instance[Plugin.OFN_PLUGIN_VERSION] = module.Version || 'v1';
 
-          //set default method of pre post get
+          //Set default method of pre post get
           if (!instance.execPreHook) {
-            instance.execPreHook = (ctx?: OpenFunctionRuntime) => {
-              console.log(ctx);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            instance.execPreHook = (ctx: OpenFunctionRuntime) => {
+              console.log(
+                `This plugin ${name}  method execPreHook is not implemented.`
+              );
             };
           }
           if (!instance.execPostHook) {
-            instance.execPostHook = (ctx?: OpenFunctionRuntime) => {
-              console.log(ctx);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            instance.execPostHook = (ctx: OpenFunctionRuntime) => {
+              console.log(
+                `This plugin ${name}  method execPostHook is not implemented.`
+              );
             };
           }
           if (!instance.get) {
@@ -272,7 +281,7 @@ export async function getUserPlugins(
               }
             };
           }
-          instances[arr[k]] = instance as Plugin;
+          instances[name] = instance as Plugin;
         }
       }
 
@@ -298,8 +307,32 @@ export async function getUserPlugins(
       options.context.prePlugins = prePlugins;
       options.context.postPlugins = postPlugins;
     } catch (error) {
+      console.error('load plugins error reason: \n');
       console.error(error);
     }
   }
   return options;
+}
+
+/**
+ * Returns resolved path to the dir containing the user plugins.
+ * Returns null if the path is not exits
+ * @param codeLocation Directory with user's code.
+ * @return Resolved path or null.
+ */
+function getPluginFiles(codeLocation: string): Array<string> | null {
+  const pluginFiles: Array<string> = [];
+  try {
+    const param = path.resolve(codeLocation + '/plugins');
+    const files = fs.readdirSync(param);
+
+    for (const file of files) {
+      pluginFiles.push(require.resolve(path.join(param, file)));
+    }
+  } catch (ex) {
+    const err: Error = <Error>ex;
+    console.error(err.message);
+    return null;
+  }
+  return pluginFiles;
 }

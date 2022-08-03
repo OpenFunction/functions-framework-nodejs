@@ -12,9 +12,9 @@ class DemoPlugin{
       console.log(`-----------demo plugin pre hook-----------`);
       ctx['pre'] = 'pre-exec';
       await sleep();
-      console.log(`-----------sleep 3----------`)
+      console.log(`-----------pre sleep 3----------`)
     }
-    execPostHook(ctx){
+    async execPostHook(ctx){
       console.log(`-----------demo plugin post hook-----------`);
       ctx['post'] = 'post-exec';
       console.log(`-----------send post-----------`);
@@ -28,4 +28,5 @@ class DemoPlugin{
     }
 }
 
-module.exports = DemoPlugin;
+// module.exports = {DemoPlugin};
+exports.DemoPlugin = DemoPlugin;
