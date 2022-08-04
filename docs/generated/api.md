@@ -165,6 +165,10 @@ class Plugin_2 {
     execPostHook(ctx?: OpenFunctionRuntime): Promise<void>;
     execPreHook(ctx?: OpenFunctionRuntime): Promise<void>;
     get(filedName: string): string;
+    // (undocumented)
+    static OFN_PLUGIN_NAME: string;
+    // (undocumented)
+    static OFN_PLUGIN_VERSION: string;
 }
 export { Plugin_2 as Plugin }
 

@@ -2737,6 +2737,64 @@
               ],
               "isOptional": false,
               "name": "get"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@openfunction/functions-framework!Plugin_2.OFN_PLUGIN_NAME:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "static OFN_PLUGIN_NAME: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "OFN_PLUGIN_NAME",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": true,
+              "isProtected": false
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@openfunction/functions-framework!Plugin_2.OFN_PLUGIN_VERSION:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "static OFN_PLUGIN_VERSION: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "OFN_PLUGIN_VERSION",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": true,
+              "isProtected": false
             }
           ],
           "implementsTokenRanges": []
