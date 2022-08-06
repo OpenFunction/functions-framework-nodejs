@@ -2069,6 +2069,34 @@
             },
             {
               "kind": "PropertySignature",
+              "canonicalReference": "@openfunction/functions-framework!OpenFunctionContext#tracing:member",
+              "docComment": "/**\n * Optional trace\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "tracing?: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "TraceConfig",
+                  "canonicalReference": "@openfunction/functions-framework!TraceConfig:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": true,
+              "releaseTag": "Public",
+              "name": "tracing",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
               "canonicalReference": "@openfunction/functions-framework!OpenFunctionContext#version:member",
               "docComment": "/**\n * The version of the context.\n */\n",
               "excerptTokens": [
@@ -2915,6 +2943,213 @@
               "name": "Knative"
             }
           ]
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@openfunction/functions-framework!TraceConfig:interface",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface TraceConfig "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "TraceConfig",
+          "preserveMemberOrder": false,
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@openfunction/functions-framework!TraceConfig#baggage:member",
+              "docComment": "/**\n * Trace baggage\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "baggage: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Record",
+                  "canonicalReference": "!Record:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<string, string>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "baggage",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@openfunction/functions-framework!TraceConfig#enabled:member",
+              "docComment": "/**\n * This is trace switch\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "enabled: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "enabled",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@openfunction/functions-framework!TraceConfig#provider:member",
+              "docComment": "/**\n * Trace Provider\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "provider: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "TraceProvider",
+                  "canonicalReference": "@openfunction/functions-framework!TraceProvider:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "provider",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@openfunction/functions-framework!TraceConfig#tags:member",
+              "docComment": "/**\n * Trace tags\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "tags: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Record",
+                  "canonicalReference": "!Record:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<string, string>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "tags",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "@openfunction/functions-framework!TraceProvider:interface",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface TraceProvider "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "TraceProvider",
+          "preserveMemberOrder": false,
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@openfunction/functions-framework!TraceProvider#name:member",
+              "docComment": "/**\n * Provider name Now is just support skywalking\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "name: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "name",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@openfunction/functions-framework!TraceProvider#oapServer:member",
+              "docComment": "/**\n * OapServer address example [skywalking-oap:11800]\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "oapServer: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "oapServer",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
         }
       ]
     }
