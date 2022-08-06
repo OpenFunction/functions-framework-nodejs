@@ -20,6 +20,7 @@ import * as loader from '../src/loader';
 import * as FunctionRegistry from '../src/function_registry';
 import {FrameworkOptions} from '../src/options';
 import {Plugin} from '../src';
+import {invoke} from 'lodash';
 
 describe('loading function', () => {
   interface TestData {
@@ -329,5 +330,118 @@ describe('loading plugins', () => {
     };
     assert.ok(await loader.getUserPlugins(data));
     console.log(data);
+  });
+});
+
+describe('loading default plugins', () => {
+  const optionWithoutUserPlugin = {
+    port: '8080',
+    target: 'helloWorld',
+    sourceLocation: process.cwd() + '/test/data',
+    signatureType: 'event',
+    printHelp: false,
+    context: {
+      name: 'demo',
+      version: '',
+      runtime: 'ASYNC',
+      // prePlugins: ['demo-plugin'],
+      // postPlugins: ['demo-plugin'],
+      tracing: {
+        enabled: true,
+        provider: {
+          name: 'skywalking',
+          oapServer: 'skywalking-oap:11800',
+        },
+        tags: {
+          func: 'function-a',
+          layer: 'faas',
+          tag1: 'value1',
+          tag2: 'value2',
+        },
+        baggage: {
+          key: 'key1',
+          value: 'value1',
+        },
+      },
+    },
+  };
+  const optionWithoutUserPluginEnabled = {
+    port: '8080',
+    target: 'helloWorld',
+    sourceLocation: process.cwd() + '/test/data',
+    signatureType: 'event',
+    printHelp: false,
+    context: {
+      name: 'demo',
+      version: '',
+      runtime: 'ASYNC',
+      // prePlugins: ['demo-plugin'],
+      // postPlugins: ['demo-plugin'],
+      tracing: {
+        enabled: false,
+        provider: {
+          name: 'skywalking',
+          oapServer: 'skywalking-oap:11800',
+        },
+        tags: {
+          func: 'function-a',
+          layer: 'faas',
+          tag1: 'value1',
+          tag2: 'value2',
+        },
+        baggage: {
+          key: 'key1',
+          value: 'value1',
+        },
+      },
+    },
+  };
+  const optionWithUserPlugin = {
+    port: '8080',
+    target: 'helloWorld',
+    sourceLocation: process.cwd() + '/test/data',
+    signatureType: 'event',
+    printHelp: false,
+    context: {
+      name: 'demo',
+      version: '',
+      runtime: 'ASYNC',
+      prePlugins: ['demo-plugin'],
+      postPlugins: ['demo-plugin'],
+      tracing: {
+        enabled: true,
+        provider: {
+          name: 'skywalking',
+          oapServer: 'skywalking-oap:11800',
+        },
+        tags: {
+          func: 'function-a',
+          layer: 'faas',
+          tag1: 'value1',
+          tag2: 'value2',
+        },
+        baggage: {
+          key: 'key1',
+          value: 'value1',
+        },
+      },
+    },
+  };
+  it('load trace skywalking ', async () => {
+    const option = optionWithoutUserPlugin as FrameworkOptions;
+    loader.getUserPlugins(option);
+    console.log(optionWithoutUserPlugin);
+  });
+
+  it('load trace skywalking with user plugin', async () => {
+    const option = optionWithUserPlugin as FrameworkOptions;
+    loader.getUserPlugins(option);
+    console.log(optionWithUserPlugin);
+  });
+
+  it('load trace skywalking enbale skywalking', async () => {
+    const option = optionWithoutUserPluginEnabled as FrameworkOptions;
+    loader.getUserPlugins(option);
+    console.log(optionWithoutUserPluginEnabled);
   });
 });

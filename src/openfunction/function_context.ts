@@ -40,6 +40,10 @@ export interface OpenFunctionContext {
    * Optional post function exec plugins.
    */
   postPlugins?: Array<string | Plugin | undefined>;
+  /**
+   * Optional trace
+   */
+  tracing?: TraceConfig;
 }
 
 /**
@@ -189,4 +193,36 @@ export class Plugin {
   public get(filedName: string) {
     return filedName;
   }
+}
+
+export interface TraceConfig {
+  /**
+   * This is trace switch
+   */
+  enabled: boolean;
+  /**
+   * Trace Provider
+   */
+  provider: TraceProvider;
+  /**
+   * Trace tags
+   */
+  tags: object;
+  /**
+   * Trace baggage
+   */
+  baggage: object;
+}
+
+export interface TraceProvider {
+  /**
+   * Provider name
+   * Now is just support skywalking
+   */
+  name: string;
+  /**
+   * OapServer address
+   * example [skywalking-oap:11800]
+   */
+  oapServer: string;
 }

@@ -26,9 +26,10 @@ import {pathToFileURL} from 'url';
 import {HandlerFunction, OpenFunctionRuntime} from './functions';
 import {SignatureType} from './types';
 import {getRegisteredFunction} from './function_registry';
-import {Plugin} from './openfunction/function_context';
+import {Plugin, TraceConfig} from './openfunction/function_context';
 import {FrameworkOptions} from './options';
 import {forEach} from 'lodash';
+import {SkywalkingPlugin} from './plugin/skywalking_plugin';
 
 // Dynamic import function required to load user code packaged as an
 // ES module is only available on Node.js v13.2.0 and up.
@@ -306,6 +307,9 @@ export async function getUserPlugins(
       console.error('load plugins error reason: \n');
       console.error(error);
     }
+
+    // Check default plugins config example trace
+    loadTracePlugin(options);
   }
   return options;
 }
@@ -364,5 +368,36 @@ function processJsModule(obj: any, tempMap: PluginClass) {
   }
   if (couldBeClass(obj) && obj.Name) {
     tempMap[obj.Name] = obj;
+  }
+}
+
+/**
+ * Check and load Trace plugin if it enable;
+ * @param option FrameworkOptions.
+ */
+function loadTracePlugin(option: FrameworkOptions) {
+  if (option.context?.tracing?.enabled) {
+    const config = option.context.tracing as TraceConfig;
+
+    if (!config.provider) {
+      console.error('Trace provider is missing');
+      return;
+    }
+
+    // Load skywalking plugin
+    if (config.provider.name === SkywalkingPlugin.Name) {
+      console.info('start load skywalking plugin');
+      //TODO check provider oapServer is valid
+      //checkOapServer
+
+      const skywalkingPlugin = new SkywalkingPlugin(
+        option.context.tracing.provider.oapServer
+      );
+      skywalkingPlugin.start();
+
+      //Push skywalking plugin instance to context
+      option.context.prePlugins?.push(skywalkingPlugin);
+      option.context.postPlugins?.push(skywalkingPlugin);
+    }
   }
 }
