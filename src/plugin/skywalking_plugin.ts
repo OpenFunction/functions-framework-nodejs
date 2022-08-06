@@ -1,9 +1,9 @@
-import {Plugin} from '../openfunction/function_context';
+import {Plugin, TraceConfig} from '../openfunction/function_context';
 
 import {ContextCarrier} from 'skywalking-backend-js/lib/trace/context/ContextCarrier';
 import {SpanLayer} from 'skywalking-backend-js/lib/proto/language-agent/Tracing_pb';
 import {Component} from 'skywalking-backend-js/lib/trace/Component';
-import Tag from 'skywalking-backend-js/lib/Tag';
+import {Tag} from 'skywalking-backend-js/lib/Tag';
 // import agent from 'skywalking-backend-js';
 import {OpenFunctionRuntime} from '../functions';
 import SpanContext from 'skywalking-backend-js/lib/trace/context/SpanContext';
@@ -14,6 +14,7 @@ import config, {
 } from 'skywalking-backend-js/lib/config/AgentConfig';
 import Protocol from 'skywalking-backend-js/lib/agent/protocol/Protocol';
 import GrpcProtocol from 'skywalking-backend-js/lib/agent/protocol/grpc/GrpcProtocol';
+import {forEach, map} from 'lodash';
 
 const spanContext = 'spanContext';
 const spanItem = 'span';
@@ -62,22 +63,37 @@ export class SkywalkingPlugin extends Plugin {
   static Name = 'skywalking';
   static Version = 'v1';
 
-  private oapServer: string;
   private ofn_plugin_name: string;
   private ofn_plugin_version: string;
-  constructor(oapServer: string) {
+
+  private traceConfig: TraceConfig;
+  private func: string;
+  private layer: string;
+  private tags: Array<Tag> = [];
+
+  constructor(traceConfig: TraceConfig) {
     super();
-    this.oapServer = oapServer;
+    this.traceConfig = traceConfig;
     this.ofn_plugin_name = SkywalkingPlugin.Name;
     this.ofn_plugin_version = SkywalkingPlugin.Version;
+
+    map(this.traceConfig.tags, (k, v) => {
+      if (k !== 'func' && k !== 'layer') {
+        this.tags.push({key: k, val: v, overridable: false});
+      }
+    });
+    this.func = this.traceConfig.tags['func'] || 'default';
+    this.layer = this.traceConfig.tags['layer'] || 'faas';
   }
 
   public start() {
-    console.info(`start skywalking agent oapServer ${this.oapServer}`);
+    console.info(
+      `start skywalking agent oapServer ${this.traceConfig.provider.oapServer}`
+    );
     agent.start({
-      serviceName: 'skywalking-plugin',
-      serviceInstance: 'skywalking-plugin-instance-name',
-      collectorAddress: this.oapServer,
+      serviceName: this.func,
+      serviceInstance: `${this.func}-instance`,
+      collectorAddress: this.traceConfig.provider.oapServer,
     });
   }
 
@@ -86,7 +102,6 @@ export class SkywalkingPlugin extends Plugin {
       console.error('ctx is undefined');
       return;
     }
-    console.log('pre skywalking ');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const temp: any = ctx;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -94,9 +109,11 @@ export class SkywalkingPlugin extends Plugin {
     const carrier = ContextCarrier.from({});
     const context = new SpanContext();
     const span = context.newEntrySpan('/dapr' + new Date().getTime(), carrier);
+    forEach(this.tags, tag => {
+      span.tag(tag);
+    });
     span.layer = SpanLayer.FAAS;
     span.component = Component.UNKNOWN;
-    span.tag(Tag.httpURL('http://dapr.test'));
     span.start();
     span.async();
 
@@ -117,9 +134,7 @@ export class SkywalkingPlugin extends Plugin {
     const trace: any = temp.trace;
     trace[spanItem].stop();
     trace[spanContext].stop(trace['span']);
-    console.log('post hook stop');
     await agent.flush();
-    console.log('post skywalking ');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

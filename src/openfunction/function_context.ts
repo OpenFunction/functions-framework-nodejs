@@ -207,11 +207,11 @@ export interface TraceConfig {
   /**
    * Trace tags
    */
-  tags: object;
+  tags: Record<string, string>;
   /**
    * Trace baggage
    */
-  baggage: object;
+  baggage: Record<string, string>;
 }
 
 export interface TraceProvider {
