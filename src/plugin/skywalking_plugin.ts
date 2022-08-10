@@ -1,4 +1,9 @@
-import {Plugin, TraceConfig} from '../openfunction/function_context';
+import {
+  OpenFunctionContext,
+  Plugin,
+  RuntimeType,
+  TraceConfig,
+} from '../openfunction/function_context';
 
 import {ContextCarrier} from 'skywalking-backend-js/lib/trace/context/ContextCarrier';
 import {SpanLayer} from 'skywalking-backend-js/lib/proto/language-agent/Tracing_pb';
@@ -8,56 +13,14 @@ import {Tag} from 'skywalking-backend-js/lib/Tag';
 import {OpenFunctionRuntime} from '../functions';
 import SpanContext from 'skywalking-backend-js/lib/trace/context/SpanContext';
 
-import config, {
-  AgentConfig,
-  finalizeConfig,
-} from 'skywalking-backend-js/lib/config/AgentConfig';
-import Protocol from 'skywalking-backend-js/lib/agent/protocol/Protocol';
-import GrpcProtocol from 'skywalking-backend-js/lib/agent/protocol/grpc/GrpcProtocol';
+import agent from 'skywalking-backend-js';
 import {forEach, map} from 'lodash';
 
 const spanContext = 'spanContext';
 const spanItem = 'span';
 
-class Agent {
-  private started = false;
-  private protocol: Protocol | null = null;
-
-  start(options: AgentConfig = {}): void {
-    if (process.env.SW_DISABLE === 'true') {
-      console.info('SkyWalking agent is disabled by `SW_DISABLE=true`');
-      return;
-    }
-
-    if (this.started) {
-      console.warn(
-        'SkyWalking agent started more than once, subsequent options to start ignored.'
-      );
-      return;
-    }
-
-    Object.assign(config, options);
-    finalizeConfig(config);
-
-    console.debug('Starting SkyWalking agent');
-
-    // new PluginInstaller().install();
-
-    this.protocol = new GrpcProtocol().heartbeat().report();
-    this.started = true;
-  }
-
-  flush(): Promise<any> | null {
-    if (this.protocol === null) {
-      console.warn('Trying to flush() SkyWalking agent which is not started.');
-      return null;
-    }
-
-    return this.protocol.flush();
-  }
-}
-
-const agent = new Agent();
+// https://github.com/apache/skywalking/blob/master/oap-server/server-starter/src/main/resources/component-libraries.yml#L515
+const componentIDOpenFunction = new Component(5013);
 
 export class SkywalkingPlugin extends Plugin {
   static Name = 'skywalking';
@@ -66,30 +29,37 @@ export class SkywalkingPlugin extends Plugin {
   private ofn_plugin_name: string;
   private ofn_plugin_version: string;
 
+  private readonly context: OpenFunctionContext;
+
   private traceConfig: TraceConfig;
-  private func: string;
-  private layer: string;
+  private func = 'default';
+  private layer = 'faas';
   private tags: Array<Tag> = [];
 
-  constructor(traceConfig: TraceConfig) {
+  constructor(context: OpenFunctionContext) {
     super();
-    this.traceConfig = traceConfig;
+    this.context = context;
+
+    this.traceConfig = context.tracing!;
     this.ofn_plugin_name = SkywalkingPlugin.Name;
     this.ofn_plugin_version = SkywalkingPlugin.Version;
 
     map(this.traceConfig.tags, (k, v) => {
-      if (k !== 'func' && k !== 'layer') {
+      if (k === 'func') {
+        this.func = v;
+      } else if (v === 'layer') {
+        this.layer = v;
+      } else {
         this.tags.push({key: k, val: v, overridable: false});
       }
     });
-    this.func = this.traceConfig.tags['func'] || 'default';
-    this.layer = this.traceConfig.tags['layer'] || 'faas';
   }
 
   public start() {
     console.info(
       `start skywalking agent oapServer ${this.traceConfig.provider.oapServer}`
     );
+
     agent.start({
       serviceName: this.func,
       serviceInstance: `${this.func}-instance`,
@@ -102,25 +72,40 @@ export class SkywalkingPlugin extends Plugin {
       console.error('ctx is undefined');
       return;
     }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const temp: any = ctx;
+    const anyCtx: any = ctx;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const trace: any = {};
-    const carrier = ContextCarrier.from({});
+
+    let carrier: ContextCarrier | undefined;
+    if (this.context.runtime === RuntimeType.Async) {
+      // TODO daprv.2.0 will add metadata option to pubsub and subscribe
+      carrier = ContextCarrier.from({});
+    } else if (this.context.runtime === RuntimeType.Knative) {
+      // TODO
+    }
+
     const context = new SpanContext();
-    const span = context.newEntrySpan('/dapr' + new Date().getTime(), carrier);
+    const span = context.newEntrySpan(`/openfunction-${this.func}`, carrier);
+
     forEach(this.tags, tag => {
       span.tag(tag);
     });
     span.layer = SpanLayer.FAAS;
-    span.component = Component.UNKNOWN;
+    span.component = componentIDOpenFunction;
+    span.tag({
+      key: 'runtimeType',
+      val: this.context.runtime,
+      overridable: false,
+    });
     span.start();
     span.async();
 
     // // eslint-disable-next-line @typescript-eslint/no-explicit-any
     trace[spanContext] = context;
     trace[spanItem] = span;
-    temp.trace = trace;
+    anyCtx.trace = trace;
   }
 
   public async execPostHook(ctx?: OpenFunctionRuntime | undefined) {
@@ -128,10 +113,11 @@ export class SkywalkingPlugin extends Plugin {
       console.error('ctx is undefined');
       return;
     }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const temp: any = ctx;
+    const anyCtx: any = ctx;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const trace: any = temp.trace;
+    const trace: any = anyCtx.trace;
     trace[spanItem].stop();
     trace[spanContext].stop(trace['span']);
     await agent.flush();

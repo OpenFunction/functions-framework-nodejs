@@ -392,7 +392,7 @@ function loadTracePlugin(option: FrameworkOptions) {
       console.info('start load skywalking plugin');
       //TODO check provider oapServer is valid
       //checkOapServer
-      const skywalkingPlugin = new SkywalkingPlugin(config);
+      const skywalkingPlugin = new SkywalkingPlugin(option.context);
       skywalkingPlugin.start();
 
       //Push skywalking plugin instance to context

@@ -24,7 +24,6 @@ export default function (
 
   const wrapper = async (data: object) => {
     // Exec pre hooks
-    console.log(context.prePlugins);
     if (context.prePlugins) {
       await context.prePlugins.reduce(async (_, current) => {
         await invoke(current, 'execPreHook', ctx);

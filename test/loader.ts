@@ -20,7 +20,6 @@ import * as loader from '../src/loader';
 import * as FunctionRegistry from '../src/function_registry';
 import {FrameworkOptions} from '../src/options';
 import {Plugin} from '../src';
-import {invoke} from 'lodash';
 
 describe('loading function', () => {
   interface TestData {
@@ -431,6 +430,8 @@ describe('loading default plugins', () => {
     const option = optionWithoutUserPlugin as FrameworkOptions;
     loader.getUserPlugins(option);
     console.log(optionWithoutUserPlugin);
+    console.log(option.context?.tracing?.baggage);
+    console.log(option.context?.tracing?.tags);
   });
 
   it('load trace skywalking with user plugin', async () => {
