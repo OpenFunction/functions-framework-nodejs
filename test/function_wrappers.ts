@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import {Request, Response} from 'express';
 
-import {OpenFunctionContext} from '../src/openfunction/function_context';
+import {OpenFunctionContext} from '../src/openfunction/context';
 
 import {Context, CloudEvent, OpenFunctionRuntime} from '../src/functions';
 import {wrapUserFunction} from '../src/function_wrappers';

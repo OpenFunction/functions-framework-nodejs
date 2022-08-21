@@ -3,36 +3,18 @@ import {deepStrictEqual} from 'assert';
 import * as sinon from 'sinon';
 import * as supertest from 'supertest';
 import * as shell from 'shelljs';
-import {cloneDeep, forEach, set} from 'lodash';
+import {cloneDeep, forEach, get, set} from 'lodash';
 
-import {OpenFunctionContext} from '../../src/openfunction/function_context';
-
+import {PluginStore} from '../../src/openfunction/plugin';
 import {OpenFunctionRuntime} from '../../src/functions';
 import {getServer} from '../../src/server';
+import {getFunctionPlugins} from '../../src/loader';
 import {FUNCTION_STATUS_HEADER_FIELD} from '../../src/types';
 
-const TEST_CONTEXT: OpenFunctionContext = {
-  name: 'test-context',
-  version: '1.0.0',
-  runtime: 'Knative',
-  outputs: {
-    file1: {
-      componentName: 'local',
-      componentType: 'bindings.localstorage',
-      metadata: {
-        fileName: 'my-file1.txt',
-      },
-    },
-    file2: {
-      componentName: 'local',
-      componentType: 'bindings.localstorage',
-      metadata: {
-        fileName: 'my-file2.txt',
-      },
-    },
-  },
-};
-const TEST_PAYLOAD = {echo: 'hello world'};
+import {Context, Payload} from '../data/mock';
+
+const TEST_CONTEXT = Context.KnativeBase;
+const TEST_PAYLOAD = Payload.Plain.RAW;
 
 describe('OpenFunction - HTTP Binding', () => {
   const APPID = 'http.dapr';
@@ -50,8 +32,10 @@ describe('OpenFunction - HTTP Binding', () => {
       }
     );
 
-    // Wait 5 seconds for dapr sidecar to start
-    setTimeout(done, 5000);
+    getFunctionPlugins(process.cwd() + '/test/data').then(() => {
+      // Wait 5 seconds for dapr sidecar to start
+      setTimeout(done, 5000);
+    });
   });
 
   after(() => {
@@ -79,6 +63,7 @@ describe('OpenFunction - HTTP Binding', () => {
   testData.forEach(test => {
     it(test.name, async () => {
       const context = cloneDeep(TEST_CONTEXT);
+      context.prePlugins = context.postPlugins = ['ticktock'];
       forEach(context.outputs, output =>
         set(output, 'operation', test.operation)
       );
@@ -99,12 +84,17 @@ describe('OpenFunction - HTTP Binding', () => {
         .send(TEST_PAYLOAD)
         .expect(test.operation ? 200 : 500)
         .expect(res => {
-          !test.operation
-            ? deepStrictEqual(
-                res.headers[FUNCTION_STATUS_HEADER_FIELD.toLowerCase()],
-                'error'
-              )
-            : deepStrictEqual(res.body, TEST_PAYLOAD);
+          const tick = get(PluginStore.Instance().get('ticktock'), 'value');
+          if (!test.operation) {
+            deepStrictEqual(
+              res.headers[FUNCTION_STATUS_HEADER_FIELD.toLowerCase()],
+              'error'
+            );
+            deepStrictEqual(tick, 1);
+          } else {
+            deepStrictEqual(res.body, TEST_PAYLOAD);
+            deepStrictEqual(tick, 0);
+          }
         });
 
       forEach(context.outputs, output => {

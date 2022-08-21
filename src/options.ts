@@ -17,8 +17,9 @@ import {resolve} from 'path';
 import * as Debug from 'debug';
 import * as minimist from 'minimist';
 
+import {OpenFunctionContext} from './openfunction/context';
+
 import {SignatureType, isValidSignatureType} from './types';
-import {OpenFunctionContext} from './openfunction/function_context';
 
 const debug = Debug('common:options');
 

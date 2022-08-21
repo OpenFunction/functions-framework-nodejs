@@ -25,4 +25,9 @@ export {http, cloudEvent, openfunction} from './function_registry';
 /**
  * @public
  */
-export * from './openfunction/function_context';
+export * from './openfunction/context';
+
+/**
+ * @public
+ */
+export {Plugin} from './openfunction/plugin';

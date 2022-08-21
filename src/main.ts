@@ -21,12 +21,9 @@ import * as process from 'process';
 import {createHttpTerminator} from 'http-terminator';
 
 import getAysncServer from './openfunction/async_server';
-import {
-  OpenFunctionContext,
-  ContextUtils,
-} from './openfunction/function_context';
+import {OpenFunctionContext, ContextUtils} from './openfunction/context';
 
-import {getUserFunction, getUserPlugins} from './loader';
+import {getUserFunction, getFunctionPlugins} from './loader';
 import {ErrorHandler} from './invoker';
 import {getServer} from './server';
 import {parseOptions, helpText, OptionsError} from './options';
@@ -44,6 +41,7 @@ export const main = async () => {
       console.error(helpText);
       return;
     }
+
     const loadedFunction = await getUserFunction(
       options.sourceLocation,
       options.target,
@@ -55,6 +53,9 @@ export const main = async () => {
       process.exit(1);
     }
     const {userFunction, signatureType} = loadedFunction;
+
+    // Load function plugins before starting server
+    await getFunctionPlugins(options.sourceLocation);
 
     // Try to determine the server runtime
     // Considering the async runtime in the first place
@@ -69,9 +70,6 @@ export const main = async () => {
 
       // DaprServer uses httpTerminator in server.stop()
       handleShutdown(async () => await server.stop());
-
-      // Load Plugins
-      await getUserPlugins(options);
     }
     // Then taking sync runtime as the fallback
     else {

@@ -16,6 +16,10 @@
 import * as domain from 'domain';
 
 import {Request, Response, RequestHandler} from 'express';
+
+import {OpenFunctionContext} from './openfunction/context';
+import {OpenFunctionRuntime} from './openfunction/runtime';
+
 import {sendCrashResponse} from './logger';
 import {sendResponse} from './invoker';
 import {isBinaryCloudEvent, getBinaryCloudEventContext} from './cloud_events';
@@ -30,9 +34,6 @@ import {
 } from './functions';
 import {CloudEvent, OpenFunction} from './functions';
 import {SignatureType} from './types';
-
-import {OpenFunctionContext} from './openfunction/function_context';
-import {OpenFunctionRuntime} from './openfunction/function_runtime';
 
 /**
  * The handler function used to signal completion of event functions.
@@ -126,18 +127,25 @@ const wrapHttpFunction = (execute: HttpFunction): RequestHandler => {
   };
 };
 
+/**
+ * It takes a user-defined function and a context object, and returns a function that can be used as an HTTP handler.
+ * @param userFunction - The function that you wrote in your index.js file.
+ * @param context - OpenFunctionContext object which hold all context data.
+ * @returns A function that takes a request and a response and returns a promise.
+ */
 const wrapOpenFunction = (
   userFunction: OpenFunction,
   context: OpenFunctionContext
 ): RequestHandler => {
   const ctx = OpenFunctionRuntime.ProxyContext(context);
+  const wrapper = OpenFunctionRuntime.WrapUserFunction(userFunction, ctx);
 
   const httpHandler = (req: Request, res: Response) => {
     const callback = getOnDoneCallback(res);
     ctx.setTrigger(req, res);
 
-    Promise.resolve()
-      .then(() => userFunction(ctx, req.body))
+    Promise.resolve(req.body)
+      .then(wrapper)
       .then(result => callback(null, result))
       .catch(err => callback(err, undefined));
   };

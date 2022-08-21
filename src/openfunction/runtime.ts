@@ -1,14 +1,18 @@
 import {env} from 'process';
 
-import {chain, get, has, extend} from 'lodash';
+import {chain, get, has, extend, isPlainObject} from 'lodash';
 import {Request, Response} from 'express';
 import {DaprClient, CommunicationProtocolEnum} from '@dapr/dapr';
+
+import {OpenFunction} from '../functions';
 
 import {
   OpenFunctionComponent,
   OpenFunctionContext,
   ContextUtils,
-} from './function_context';
+} from './context';
+
+import {Plugin, PluginStore} from './plugin';
 
 /**
  * Defining the interface of the HttpTarget.
@@ -41,10 +45,18 @@ export abstract class OpenFunctionRuntime {
   protected trigger?: OpenFunctionTrigger;
 
   /**
+   * An object to hold local data.
+   * TODO: Clarify the usage of this property
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly locals: Record<string, any>;
+
+  /**
    * Constructor of the OpenFunctionRuntime.
    */
   constructor(context: OpenFunctionContext) {
     this.context = context;
+    this.locals = {};
   }
 
   /**
@@ -72,6 +84,40 @@ export abstract class OpenFunctionRuntime {
         else return Reflect.get(target, prop);
       },
     });
+  }
+
+  /**
+   * It takes a user function and a context object, and returns a function that executes the user
+   * function with the context object, and executes all the pre and post hooks before and after the user function.
+   * @param userFunction - The function that you want to wrap.
+   * @param context - This is the context object that is passed to the user function.
+   * @returns A function that takes in data and returns a promise.
+   */
+  static WrapUserFunction(
+    userFunction: OpenFunction,
+    context: OpenFunctionContext | OpenFunctionRuntime
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): (data: any) => Promise<void> {
+    const ctx: OpenFunctionRuntime = !isPlainObject(context)
+      ? (context as OpenFunctionRuntime)
+      : OpenFunctionRuntime.ProxyContext(context as OpenFunctionContext);
+
+    // Load plugin stores
+    const userPlugins = PluginStore.Instance();
+    const sysPlugins = PluginStore.Instance(PluginStore.Type.BUILTIN);
+
+    return async data => {
+      // Execute pre hooks, system plugins go first
+      await sysPlugins.execPreHooks(ctx);
+      await userPlugins.execPreHooks(ctx);
+
+      // Execute user function
+      await userFunction(ctx, data);
+
+      // Execute pre hooks, system plugins go last
+      await userPlugins.execPostHooks(ctx);
+      await sysPlugins.execPostHooks(ctx);
+    };
   }
 
   /**
@@ -107,6 +153,19 @@ export abstract class OpenFunctionRuntime {
    */
   setTrigger(req: Request, res?: Response) {
     this.trigger = extend(this.trigger, {req, res});
+  }
+
+  /**
+   * Get a plugin from the plugin store, or if it doesn't exist, get it from the built-in plugin store.
+   *
+   * @param name - The name of the plugin to get.
+   * @returns A plugin object
+   */
+  getPlugin(name: string): Plugin {
+    return (
+      PluginStore.Instance().get(name) ||
+      PluginStore.Instance(PluginStore.Type.BUILTIN).get(name)
+    );
   }
 
   /**

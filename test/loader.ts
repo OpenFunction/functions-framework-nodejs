@@ -13,15 +13,14 @@
 // limitations under the License.
 
 import * as assert from 'assert';
+
 import * as express from 'express';
 import * as semver from 'semver';
-import * as functions from '../src/functions';
-import * as loader from '../src/loader';
-import * as FunctionRegistry from '../src/function_registry';
-import {FrameworkOptions} from '../src/options';
-import {Plugin} from '../src';
 
-describe('loading function', () => {
+import {http, cloudEvent, HttpFunction} from '../src';
+import * as loader from '../src/loader';
+
+describe('Load function and plugins', () => {
   interface TestData {
     name: string;
     codeLocation: string;
@@ -48,8 +47,7 @@ describe('loading function', () => {
         test.target,
         'http'
       );
-      const userFunction =
-        loadedFunction?.userFunction as functions.HttpFunction;
+      const userFunction = loadedFunction?.userFunction as HttpFunction;
       const returned = userFunction(express.request, express.response);
       assert.strictEqual(returned, 'PASS');
     });
@@ -74,13 +72,13 @@ describe('loading function', () => {
   ];
 
   for (const test of esmTestData) {
-    const loadFn: () => Promise<functions.HttpFunction> = async () => {
+    const loadFn: () => Promise<HttpFunction> = async () => {
       const loadedFunction = await loader.getUserFunction(
         process.cwd() + test.codeLocation,
         test.target,
         'http'
       );
-      return loadedFunction?.userFunction as functions.HttpFunction;
+      return loadedFunction?.userFunction as HttpFunction;
     };
     if (semver.lt(process.version, loader.MIN_NODE_VERSION_ESMODULES)) {
       it(`should fail to load function in an ES module ${test.name}`, async () => {
@@ -96,7 +94,7 @@ describe('loading function', () => {
   }
 
   it('loads a declaratively registered function', async () => {
-    FunctionRegistry.http('registeredFunction', () => {
+    http('registeredFunction', () => {
       return 'PASS';
     });
     const loadedFunction = await loader.getUserFunction(
@@ -104,13 +102,13 @@ describe('loading function', () => {
       'registeredFunction',
       'http'
     );
-    const userFunction = loadedFunction?.userFunction as functions.HttpFunction;
+    const userFunction = loadedFunction?.userFunction as HttpFunction;
     const returned = userFunction(express.request, express.response);
     assert.strictEqual(returned, 'PASS');
   });
 
   it('allows a mix of registered and non registered functions', async () => {
-    FunctionRegistry.http('registeredFunction', () => {
+    http('registeredFunction', () => {
       return 'FAIL';
     });
     const loadedFunction = await loader.getUserFunction(
@@ -118,13 +116,13 @@ describe('loading function', () => {
       'testFunction',
       'http'
     );
-    const userFunction = loadedFunction?.userFunction as functions.HttpFunction;
+    const userFunction = loadedFunction?.userFunction as HttpFunction;
     const returned = userFunction(express.request, express.response);
     assert.strictEqual(returned, 'PASS');
   });
 
   it('respects the registered signature type', async () => {
-    FunctionRegistry.cloudEvent('registeredFunction', () => {});
+    cloudEvent('registeredFunction', () => {});
     const loadedFunction = await loader.getUserFunction(
       process.cwd() + '/test/data/with_main',
       'registeredFunction',
@@ -132,202 +130,16 @@ describe('loading function', () => {
     );
     assert.strictEqual(loadedFunction?.signatureType, 'cloudevent');
   });
-});
 
-describe('loading plugins', () => {
-  interface ExceptData {
-    prePlugins: Array<string>;
-    postPlugins: Array<string>;
-  }
-
-  interface TestData {
-    options: FrameworkOptions;
-    except: ExceptData;
-  }
-  const testData: TestData[] = [
-    {
-      options: {
-        port: '8080',
-        target: 'helloWorld',
-        sourceLocation: process.cwd() + '/test/data',
-        signatureType: 'event',
-        printHelp: false,
-        context: {
-          name: 'demo',
-          version: '',
-          runtime: 'ASYNC',
-          prePlugins: ['demo-plugin'],
-          postPlugins: ['demo-plugin'],
-        },
-      },
-      except: {
-        prePlugins: ['demo-plugin'],
-        postPlugins: ['demo-plugin'],
-      },
-    },
-    {
-      options: {
-        port: '8080',
-        target: 'helloWorld',
-        sourceLocation: process.cwd() + '/test/data',
-        signatureType: 'event',
-        printHelp: false,
-        context: {
-          name: 'demo',
-          version: '',
-          runtime: 'ASYNC',
-          prePlugins: ['demo-plugin'],
-          postPlugins: [],
-        },
-      },
-      except: {
-        prePlugins: ['demo-plugin'],
-        postPlugins: [],
-      },
-    },
-    {
-      options: {
-        port: '8080',
-        target: 'helloWorld',
-        sourceLocation: process.cwd() + '/test/data',
-        signatureType: 'event',
-        printHelp: false,
-        context: {
-          name: 'demo',
-          version: '',
-          runtime: 'ASYNC',
-          prePlugins: [],
-          postPlugins: [],
-        },
-      },
-      except: {
-        prePlugins: [],
-        postPlugins: [],
-      },
-    },
-    {
-      options: {
-        port: '8080',
-        target: 'helloWorld',
-        sourceLocation: process.cwd() + '/test/data',
-        signatureType: 'event',
-        printHelp: false,
-        context: {
-          name: 'error',
-          version: '',
-          runtime: 'ASYNC',
-          prePlugins: ['error-plugin'],
-          postPlugins: ['error-plugin'],
-        },
-      },
-      except: {
-        prePlugins: [],
-        postPlugins: [],
-      },
-    },
-    {
-      options: {
-        port: '8080',
-        target: 'helloWorld',
-        sourceLocation: process.cwd() + '/test/data',
-        signatureType: 'event',
-        printHelp: false,
-        context: {
-          name: 'error',
-          version: '',
-          runtime: 'ASYNC',
-          prePlugins: ['error-miss-version-plugin', 'demo-plugin'],
-          postPlugins: ['error-miss-version-plugin'],
-        },
-      },
-      except: {
-        prePlugins: ['error-miss-version-plugin', 'demo-plugin'],
-        postPlugins: ['error-miss-version-plugin'],
-      },
-    },
-  ];
-
-  it('load exits plugins', async () => {
-    for (const test of testData) {
-      const options = await loader.getUserPlugins(test.options);
-      const current: ExceptData = {
-        prePlugins: [],
-        postPlugins: [],
-      };
-
-      options.context!.prePlugins!.forEach(item => {
-        assert(typeof item === 'object');
-        assert(item.get(Plugin.OFN_PLUGIN_VERSION) === 'v1');
-        current.prePlugins.push(item.get(Plugin.OFN_PLUGIN_NAME));
-      });
-      options.context!.postPlugins!.forEach(item => {
-        assert(typeof item === 'object');
-        assert(item.get(Plugin.OFN_PLUGIN_VERSION) === 'v1');
-        current.postPlugins.push(item.get(Plugin.OFN_PLUGIN_NAME));
-      });
-
-      assert.deepStrictEqual(current, test.except);
-    }
-  });
-
-  const test: TestData = {
-    options: {
-      port: '8080',
-      target: 'helloWorld',
-      sourceLocation: process.cwd() + '/test/data',
-      signatureType: 'event',
-      printHelp: false,
-      context: {
-        name: 'error',
-        version: '',
-        runtime: 'ASYNC',
-        prePlugins: [''],
-        postPlugins: [''],
-      },
-    },
-    except: {
-      prePlugins: [''],
-      postPlugins: [''],
-    },
-  };
-
-  function copyAndSet(name: string): TestData {
-    const data: TestData = JSON.parse(JSON.stringify(test));
-    data.options.context!.prePlugins![0] = name;
-    data.options.context!.postPlugins![0] = name;
-    data.except.postPlugins[0] = name;
-    data.except.prePlugins[0] = name;
-    return data;
-  }
-
-  it('user plugin miss all', async () => {
-    const data = copyAndSet('error-miss-all-plugin');
-    const options = await loader.getUserPlugins(data.options);
-    assert(typeof options.context!.prePlugins![0] === 'object');
-    assert(
-      options.context!.prePlugins![0].get(Plugin.OFN_PLUGIN_NAME) ===
-        'error-miss-all-plugin'
+  it('should only load valid plugin class and ignore other', async () => {
+    const loadedPlugins = await loader.getFunctionPlugins(
+      process.cwd() + '/test/data'
     );
-    assert(options.context!.prePlugins![0].execPreHook);
-    assert(options.context!.prePlugins![0].execPostHook);
-  });
+    assert.ok(loadedPlugins);
 
-  it('load multi plugins ', async () => {
-    const data: FrameworkOptions = {
-      port: '8080',
-      target: 'helloWorld',
-      sourceLocation: process.cwd() + '/test/data',
-      signatureType: 'event',
-      printHelp: false,
-      context: {
-        name: 'demo',
-        version: '',
-        runtime: 'ASYNC',
-        prePlugins: ['demo-plugin', 'error-miss-all-plugin'],
-        postPlugins: ['demo-plugin', 'error-miss-all-plugin'],
-      },
-    };
-    assert.ok(await loader.getUserPlugins(data));
-    console.log(data);
+    ['noname'].forEach(v => assert.ok(!loadedPlugins[v]));
+    ['numbers', 'ticktock', 'countdown'].forEach(v =>
+      assert.strictEqual(loadedPlugins[v]?.name, v)
+    );
   });
 });

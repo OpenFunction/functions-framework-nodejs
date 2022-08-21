@@ -110,7 +110,7 @@ export interface LegacyEvent {
 // @public
 export interface OpenFunction {
     // (undocumented)
-    (ctx: OpenFunctionRuntime, data: {}): any;
+    (ctx: OpenFunctionRuntime, data: object): any;
 }
 
 // @public
@@ -136,8 +136,8 @@ export interface OpenFunctionContext {
     name: string;
     outputs?: OpenFunctionBinding;
     port?: string;
-    postPlugins?: Array<string | Plugin_2 | undefined>;
-    prePlugins?: Array<string | Plugin_2 | undefined>;
+    postPlugins?: string[];
+    prePlugins?: string[];
     runtime: `${RuntimeType}` | `${Capitalize<RuntimeType>}` | `${Uppercase<RuntimeType>}`;
     version: string;
 }
@@ -146,6 +146,8 @@ export interface OpenFunctionContext {
 export abstract class OpenFunctionRuntime {
     constructor(context: OpenFunctionContext);
     protected readonly context: OpenFunctionContext;
+    getPlugin(name: string): Plugin_2;
+    readonly locals: Record<string, any>;
     static Parse(context: OpenFunctionContext): OpenFunctionRuntime;
     static ProxyContext(context: OpenFunctionContext): OpenFunctionRuntime;
     get req(): Request_3<ParamsDictionary, any, any, ParsedQs, Record<string, any>> | undefined;
@@ -158,17 +160,17 @@ export abstract class OpenFunctionRuntime {
     };
     // Warning: (ae-forgotten-export) The symbol "OpenFunctionTrigger" needs to be exported by the entry point index.d.ts
     protected trigger?: OpenFunctionTrigger;
+    static WrapUserFunction(userFunction: OpenFunction, context: OpenFunctionContext | OpenFunctionRuntime): (data: any) => Promise<void>;
 }
 
 // @public
 class Plugin_2 {
-    execPostHook(ctx?: OpenFunctionRuntime): Promise<void>;
-    execPreHook(ctx?: OpenFunctionRuntime): Promise<void>;
-    get(filedName: string): string;
-    // (undocumented)
-    static OFN_PLUGIN_NAME: string;
-    // (undocumented)
-    static OFN_PLUGIN_VERSION: string;
+    constructor(name: string, version?: string);
+    execPostHook(ctx: OpenFunctionRuntime | null, plugins: Record<string, Plugin_2>): Promise<void>;
+    execPreHook(ctx: OpenFunctionRuntime | null, plugins: Record<string, Plugin_2>): Promise<void>;
+    get(prop: string): any;
+    readonly name: string;
+    readonly version: string;
 }
 export { Plugin_2 as Plugin }
 

@@ -18,17 +18,19 @@
  * @packageDocumentation
  */
 
+import * as fs from 'fs';
 import * as path from 'path';
+import {pathToFileURL} from 'url';
+
 import * as semver from 'semver';
 import * as readPkgUp from 'read-pkg-up';
-import * as fs from 'fs';
-import {pathToFileURL} from 'url';
-import {HandlerFunction, OpenFunctionRuntime} from './functions';
-import {SignatureType} from './types';
-import {getRegisteredFunction} from './function_registry';
-import {Plugin} from './openfunction/function_context';
-import {FrameworkOptions} from './options';
 import {forEach} from 'lodash';
+
+import {Plugin, PluginStore, PluginMap} from './openfunction/plugin';
+
+import {HandlerFunction} from './functions';
+import {getRegisteredFunction} from './function_registry';
+import {SignatureType} from './types';
 
 // Dynamic import function required to load user code packaged as an
 // ES module is only available on Node.js v13.2.0 and up.
@@ -81,6 +83,28 @@ const dynamicImport = new Function(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) as (modulePath: string) => Promise<any>;
 
+async function loadModule(modulePath: string) {
+  let module;
+
+  const esModule = await isEsModule(modulePath);
+  if (esModule) {
+    if (semver.lt(process.version, MIN_NODE_VERSION_ESMODULES)) {
+      console.error(
+        `Cannot load ES Module on Node.js ${process.version}. ` +
+          `Please upgrade to Node.js v${MIN_NODE_VERSION_ESMODULES} and up.`
+      );
+      return null;
+    }
+    // Resolve module path to file:// URL. Required for windows support.
+    const fpath = pathToFileURL(modulePath);
+    module = await dynamicImport(fpath.href);
+  } else {
+    module = require(modulePath);
+  }
+
+  return module;
+}
+
 /**
  * Returns user's function from function file.
  * Returns null if function can't be retrieved.
@@ -102,25 +126,10 @@ export async function getUserFunction(
       return null;
     }
 
-    let functionModule;
-    const esModule = await isEsModule(functionModulePath);
-    if (esModule) {
-      if (semver.lt(process.version, MIN_NODE_VERSION_ESMODULES)) {
-        console.error(
-          `Cannot load ES Module on Node.js ${process.version}. ` +
-            `Please upgrade to Node.js v${MIN_NODE_VERSION_ESMODULES} and up.`
-        );
-        return null;
-      }
-      // Resolve module path to file:// URL. Required for windows support.
-      const fpath = pathToFileURL(functionModulePath);
-      functionModule = await dynamicImport(fpath.href);
-    } else {
-      functionModule = require(functionModulePath);
-    }
+    // Firstly, we try to load function
+    const functionModule = await loadModule(functionModulePath);
 
-    // If the customer declaratively registered a function matching the target
-    // return that.
+    // If the customer declaratively registered a function matching the target return that
     const registeredFunction = getRegisteredFunction(functionTarget);
     if (registeredFunction) {
       return registeredFunction;
@@ -199,170 +208,67 @@ function getFunctionModulePath(codeLocation: string): string | null {
   return path;
 }
 
-type PluginClass = Record<string, any>;
 /**
- * Returns user's plugin from function file.
- * Returns null if plugin can't be retrieved.
- * @return User's plugins or null.
+ * It loads all the plugins from the provided code location.
+ * @param codeLocation - The path to the plugin source codes.
+ * @return A named plugin map object or null.
  */
-export async function getUserPlugins(
-  options: FrameworkOptions
-): Promise<FrameworkOptions> {
-  // Get plugin set
-  const pluginSet: Set<string> = new Set();
-  if (options.context) {
-    if (options.context.prePlugins) {
-      forEach(options.context.prePlugins, plugin => {
-        typeof plugin === 'string' && pluginSet.add(plugin);
-      });
-    }
-    if (options.context.postPlugins) {
-      forEach(options.context.postPlugins, plugin => {
-        typeof plugin === 'string' && pluginSet.add(plugin);
-      });
-    }
+export async function getFunctionPlugins(
+  codeLocation: string
+): Promise<PluginMap | null> {
+  const files = getPluginsModulePath(codeLocation);
+  if (!files) return null;
 
+  // Try to load all plugin module files
+
+  const store = PluginStore.Instance();
+  const plugins: PluginMap = {};
+
+  for (const file of files) {
     try {
-      type Instance = Record<string, Plugin>;
-      // Load plugin js files
-      const instances: Instance = {};
+      const modules = await loadModule(file);
 
-      const pluginFiles = getPluginFiles(options.sourceLocation);
-      if (pluginFiles === null) {
-        console.warn('[warn-!!!] user plugins files load failed ');
-        options.context.prePlugins = [];
-        options.context.postPlugins = [];
-        return options;
-      }
-
-      // Find plugins class
-      const tempMap: PluginClass = {};
-      for (const pluginFile of pluginFiles) {
-        const jsMoulde = require(pluginFile);
-        processJsModule(jsMoulde, tempMap);
-      }
-
-      // Instance plugin dynamic set ofn_plugin_name
-      const pluginNames = Array.from(pluginSet.values());
-      for (const name of pluginNames) {
-        const module = tempMap[name];
-        if (module) {
-          const instance = new module();
-          instance[Plugin.OFN_PLUGIN_NAME] = module.Name;
-          instance[Plugin.OFN_PLUGIN_VERSION] = module.Version || 'v1';
-
-          //Set default method of pre post get
-          if (!instance.execPreHook) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            instance.execPreHook = (ctx: OpenFunctionRuntime) => {
-              console.log(
-                `This plugin ${name}  method execPreHook is not implemented.`
-              );
-            };
-          }
-          if (!instance.execPostHook) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            instance.execPostHook = (ctx: OpenFunctionRuntime) => {
-              console.log(
-                `This plugin ${name}  method execPostHook is not implemented.`
-              );
-            };
-          }
-          if (!instance.get) {
-            instance.get = (filedName: string) => {
-              for (const key in instance) {
-                if (key === filedName) {
-                  return instance[key];
-                }
-              }
-            };
-          }
-          instances[name] = instance as Plugin;
+      forEach(modules, module => {
+        // All plugin modules should extend from Plugin abstract class
+        if (module.prototype instanceof Plugin) {
+          // Try to create plugin instance
+          const plugin = new module();
+          // Register plugin instance to plugin store
+          store.register(plugin);
+          // Also save to return records
+          plugins[plugin.name] = plugin;
         }
-      }
-
-      const prePlugins: Array<Plugin> = [];
-      const postPlugins: Array<Plugin> = [];
-      if (options.context.prePlugins) {
-        forEach(options.context.prePlugins, plugin => {
-          if (typeof plugin === 'string') {
-            const instance = instances[plugin];
-            typeof instance === 'object' && prePlugins.push(instance);
-          }
-        });
-      }
-      if (options.context.postPlugins) {
-        forEach(options.context.postPlugins, plugin => {
-          if (typeof plugin === 'string') {
-            const instance = instances[plugin];
-            typeof instance === 'object' && postPlugins.push(instance);
-          }
-        });
-      }
-
-      options.context.prePlugins = prePlugins;
-      options.context.postPlugins = postPlugins;
-    } catch (error) {
-      console.error('load plugins error reason: \n');
-      console.error(error);
+      });
+    } catch (ex) {
+      const err = <Error>ex;
+      console.error(
+        "Provided module can't be loaded. Plesae make sure your module extend Plugin class properly." +
+          `\nDetailed stack trace: ${err.stack}`
+      );
     }
   }
-  return options;
+
+  return plugins;
 }
 
 /**
- * Returns resolved path to the dir containing the user plugins.
- * Returns null if the path is not exits
+ * Returns resolved path of the folder containing the user plugins.
+ * Returns null if the plugin folder does not exist.
  * @param codeLocation Directory with user's code.
- * @return Resolved path or null.
+ * @return Resolved path of plugins or null.
  */
-function getPluginFiles(codeLocation: string): Array<string> | null {
-  const pluginFiles: Array<string> = [];
+function getPluginsModulePath(codeLocation: string): string[] | null {
   try {
     const param = path.resolve(codeLocation + '/plugins');
     const files = fs.readdirSync(param);
 
+    const pluginFiles: string[] = [];
     for (const file of files) {
       pluginFiles.push(require.resolve(path.join(param, file)));
     }
+    return pluginFiles;
   } catch (ex) {
-    const err: Error = <Error>ex;
-    console.error(err.message);
+    console.error('Fail to load plugins: %s', ex);
     return null;
-  }
-  return pluginFiles;
-}
-/**
- * Returns rdetermine whether it is a class.
- * Returns boolean is can be class
- * @param obj jsmodule.
- * @return boolean of it is a class.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function couldBeClass(obj: any): boolean {
-  return (
-    typeof obj === 'function' &&
-    obj.prototype !== undefined &&
-    obj.prototype.constructor === obj &&
-    obj.toString().slice(0, 5) === 'class'
-  );
-}
-
-/**
- * Process jsMoulde if it can be a plugin class put it into tempMap.
- * @param obj jsmodule.
- * @param tempMap PluginClass.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function processJsModule(obj: any, tempMap: PluginClass) {
-  if (typeof obj === 'object') {
-    for (const o in obj) {
-      if (couldBeClass(obj[o]) && obj[o].Name) {
-        tempMap[obj[o].Name] = obj[o];
-      }
-    }
-  }
-  if (couldBeClass(obj) && obj.Name) {
-    tempMap[obj.Name] = obj;
   }
 }

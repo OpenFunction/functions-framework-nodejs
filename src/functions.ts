@@ -19,7 +19,7 @@
 import {Request as ExpressRequest, Response} from 'express';
 import {CloudEventV1 as CloudEvent} from 'cloudevents';
 
-import {OpenFunctionRuntime} from './openfunction/function_runtime';
+import {OpenFunctionRuntime} from './openfunction/runtime';
 
 /**
  * @public
@@ -82,7 +82,7 @@ export interface CloudEventFunctionWithCallback<T = unknown> {
  * @public
  */
 export interface OpenFunction {
-  (ctx: OpenFunctionRuntime, data: {}): any;
+  (ctx: OpenFunctionRuntime, data: object): any;
 }
 
 /**

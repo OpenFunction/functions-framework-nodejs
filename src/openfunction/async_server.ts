@@ -1,10 +1,10 @@
-import {forEach, invoke} from 'lodash';
+import {forEach} from 'lodash';
 import {DaprServer} from '@dapr/dapr';
 
 import {OpenFunction} from '../functions';
 
-import {OpenFunctionContext, ContextUtils} from './function_context';
-import {OpenFunctionRuntime} from './function_runtime';
+import {OpenFunctionContext, ContextUtils} from './context';
+import {OpenFunctionRuntime} from './runtime';
 
 export type AsyncFunctionServer = DaprServer;
 
@@ -12,36 +12,18 @@ export type AsyncFunctionServer = DaprServer;
  * Creates and configures an Dapr server and returns an HTTP server
  * which will run it.
  * @param userFunction User's function.
- * @param functionSignatureType Type of user's function signature.
+ * @param context Context of user's function.
  * @return HTTP server.
  */
 export default function (
   userFunction: OpenFunction,
   context: OpenFunctionContext
 ): AsyncFunctionServer {
+  // Initailize Dapr server
   const app = new DaprServer('localhost', context.port);
-  const ctx = OpenFunctionRuntime.ProxyContext(context);
 
-  const wrapper = async (data: object) => {
-    // Exec pre hooks
-    console.log(context.prePlugins);
-    if (context.prePlugins) {
-      await context.prePlugins.reduce(async (_, current) => {
-        await invoke(current, 'execPreHook', ctx);
-        return [];
-      }, Promise.resolve([]));
-    }
-
-    await userFunction(ctx, data);
-
-    // Exec post hooks
-    if (context.postPlugins) {
-      await context.postPlugins.reduce(async (_, current) => {
-        await invoke(current, 'execPostHook', ctx);
-        return [];
-      }, Promise.resolve([]));
-    }
-  };
+  // Create wrapper for user function
+  const wrapper = OpenFunctionRuntime.WrapUserFunction(userFunction, context);
 
   // Initialize the server with the user's function.
   // For server interfaces, refer to https://github.com/dapr/js-sdk/blob/master/src/interfaces/Server/

@@ -1,7 +1,7 @@
 {
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
-    "toolVersion": "7.28.4",
+    "toolVersion": "7.29.3",
     "schemaVersion": 1009,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
@@ -1487,7 +1487,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "{}"
+                  "text": "object"
                 },
                 {
                   "kind": "Content",
@@ -1916,29 +1916,15 @@
             {
               "kind": "PropertySignature",
               "canonicalReference": "@openfunction/functions-framework!OpenFunctionContext#postPlugins:member",
-              "docComment": "/**\n * Optional post function exec plugins.\n */\n",
+              "docComment": "/**\n * Optional plugins to be executed after user function.\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
                   "text": "postPlugins?: "
                 },
                 {
-                  "kind": "Reference",
-                  "text": "Array",
-                  "canonicalReference": "!Array:interface"
-                },
-                {
                   "kind": "Content",
-                  "text": "<string | "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "Plugin",
-                  "canonicalReference": "@openfunction/functions-framework!Plugin:class"
-                },
-                {
-                  "kind": "Content",
-                  "text": " | undefined>"
+                  "text": "string[]"
                 },
                 {
                   "kind": "Content",
@@ -1951,35 +1937,21 @@
               "name": "postPlugins",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
-                "endIndex": 5
+                "endIndex": 2
               }
             },
             {
               "kind": "PropertySignature",
               "canonicalReference": "@openfunction/functions-framework!OpenFunctionContext#prePlugins:member",
-              "docComment": "/**\n * Optional pre function exec plugins.\n */\n",
+              "docComment": "/**\n * Optional plugins to be executed before user function.\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
                   "text": "prePlugins?: "
                 },
                 {
-                  "kind": "Reference",
-                  "text": "Array",
-                  "canonicalReference": "!Array:interface"
-                },
-                {
                   "kind": "Content",
-                  "text": "<string | "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "Plugin",
-                  "canonicalReference": "@openfunction/functions-framework!Plugin:class"
-                },
-                {
-                  "kind": "Content",
-                  "text": " | undefined>"
+                  "text": "string[]"
                 },
                 {
                   "kind": "Content",
@@ -1992,7 +1964,7 @@
               "name": "prePlugins",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
-                "endIndex": 5
+                "endIndex": 2
               }
             },
             {
@@ -2173,6 +2145,88 @@
               },
               "isStatic": false,
               "isProtected": true
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@openfunction/functions-framework!OpenFunctionRuntime#getPlugin:member(1)",
+              "docComment": "/**\n * Get a plugin from the plugin store, or if it doesn't exist, get it from the built-in plugin store.\n *\n * @param name - The name of the plugin to get.\n *\n * @returns A plugin object\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "getPlugin(name: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Plugin",
+                  "canonicalReference": "@openfunction/functions-framework!Plugin:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "releaseTag": "Public",
+              "isProtected": false,
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "name",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  },
+                  "isOptional": false
+                }
+              ],
+              "isOptional": false,
+              "name": "getPlugin"
+            },
+            {
+              "kind": "Property",
+              "canonicalReference": "@openfunction/functions-framework!OpenFunctionRuntime#locals:member",
+              "docComment": "/**\n * An object to hold local data. TODO: Clarify the usage of this property\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "readonly locals: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Record",
+                  "canonicalReference": "!Record:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<string, any>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": true,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "locals",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              },
+              "isStatic": false,
+              "isProtected": false
             },
             {
               "kind": "Method",
@@ -2567,6 +2621,89 @@
               },
               "isStatic": false,
               "isProtected": true
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@openfunction/functions-framework!OpenFunctionRuntime.WrapUserFunction:member(1)",
+              "docComment": "/**\n * It takes a user function and a context object, and returns a function that executes the user function with the context object, and executes all the pre and post hooks before and after the user function.\n *\n * @param userFunction - The function that you want to wrap.\n *\n * @param context - This is the context object that is passed to the user function.\n *\n * @returns A function that takes in data and returns a promise.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "static WrapUserFunction(userFunction: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OpenFunction",
+                  "canonicalReference": "@openfunction/functions-framework!OpenFunction:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", context: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OpenFunctionContext",
+                  "canonicalReference": "@openfunction/functions-framework!OpenFunctionContext:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": " | "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OpenFunctionRuntime",
+                  "canonicalReference": "@openfunction/functions-framework!OpenFunctionRuntime:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(data: any) => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Promise",
+                  "canonicalReference": "!Promise:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<void>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": true,
+              "returnTypeTokenRange": {
+                "startIndex": 7,
+                "endIndex": 10
+              },
+              "releaseTag": "Public",
+              "isProtected": false,
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "userFunction",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  },
+                  "isOptional": false
+                },
+                {
+                  "parameterName": "context",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 6
+                  },
+                  "isOptional": false
+                }
+              ],
+              "isOptional": false,
+              "name": "WrapUserFunction"
             }
           ],
           "implementsTokenRanges": []
@@ -2574,7 +2711,7 @@
         {
           "kind": "Class",
           "canonicalReference": "@openfunction/functions-framework!Plugin_2:class",
-          "docComment": "/**\n * The OpenFunction's plugin template.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Defining an abstract class to represent Plugin.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2586,18 +2723,92 @@
           "preserveMemberOrder": false,
           "members": [
             {
-              "kind": "Method",
-              "canonicalReference": "@openfunction/functions-framework!Plugin_2#execPostHook:member(1)",
-              "docComment": "/**\n * post main function exec.\n *\n * @param ctx - The openfunction runtime .\n */\n",
+              "kind": "Constructor",
+              "canonicalReference": "@openfunction/functions-framework!Plugin_2:constructor(1)",
+              "docComment": "/**\n * Constructor of the OpenFunction plugin.\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "execPostHook(ctx?: "
+                  "text": "constructor(name: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", version?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ");"
+                }
+              ],
+              "releaseTag": "Public",
+              "isProtected": false,
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "name",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  },
+                  "isOptional": false
+                },
+                {
+                  "parameterName": "version",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
+                  },
+                  "isOptional": true
+                }
+              ]
+            },
+            {
+              "kind": "Method",
+              "canonicalReference": "@openfunction/functions-framework!Plugin_2#execPostHook:member(1)",
+              "docComment": "/**\n * This function is called after the user function is executed.\n *\n * @param ctx - Object that contains information about the function that is being executed.\n *\n * @param plugins - The collection of loaded pre and post hook plugins.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "execPostHook(ctx: "
                 },
                 {
                   "kind": "Reference",
                   "text": "OpenFunctionRuntime",
                   "canonicalReference": "@openfunction/functions-framework!OpenFunctionRuntime:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": " | null"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", plugins: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Record",
+                  "canonicalReference": "!Record:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<string, "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Plugin",
+                  "canonicalReference": "@openfunction/functions-framework!Plugin:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
                 },
                 {
                   "kind": "Content",
@@ -2619,8 +2830,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 3,
-                "endIndex": 5
+                "startIndex": 9,
+                "endIndex": 11
               },
               "releaseTag": "Public",
               "isProtected": false,
@@ -2630,9 +2841,17 @@
                   "parameterName": "ctx",
                   "parameterTypeTokenRange": {
                     "startIndex": 1,
-                    "endIndex": 2
+                    "endIndex": 3
                   },
-                  "isOptional": true
+                  "isOptional": false
+                },
+                {
+                  "parameterName": "plugins",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 4,
+                    "endIndex": 8
+                  },
+                  "isOptional": false
                 }
               ],
               "isOptional": false,
@@ -2641,16 +2860,42 @@
             {
               "kind": "Method",
               "canonicalReference": "@openfunction/functions-framework!Plugin_2#execPreHook:member(1)",
-              "docComment": "/**\n * pre main function exec.\n *\n * @param ctx - The openfunction runtime .\n */\n",
+              "docComment": "/**\n * This function is called before the user function is executed.\n *\n * @param ctx - Object that contains information about the function that is being executed.\n *\n * @param plugins - The collection of loaded pre and post hook plugins.\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "execPreHook(ctx?: "
+                  "text": "execPreHook(ctx: "
                 },
                 {
                   "kind": "Reference",
                   "text": "OpenFunctionRuntime",
                   "canonicalReference": "@openfunction/functions-framework!OpenFunctionRuntime:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": " | null"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", plugins: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Record",
+                  "canonicalReference": "!Record:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<string, "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Plugin",
+                  "canonicalReference": "@openfunction/functions-framework!Plugin:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
                 },
                 {
                   "kind": "Content",
@@ -2672,8 +2917,8 @@
               ],
               "isStatic": false,
               "returnTypeTokenRange": {
-                "startIndex": 3,
-                "endIndex": 5
+                "startIndex": 9,
+                "endIndex": 11
               },
               "releaseTag": "Public",
               "isProtected": false,
@@ -2683,9 +2928,17 @@
                   "parameterName": "ctx",
                   "parameterTypeTokenRange": {
                     "startIndex": 1,
-                    "endIndex": 2
+                    "endIndex": 3
                   },
-                  "isOptional": true
+                  "isOptional": false
+                },
+                {
+                  "parameterName": "plugins",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 4,
+                    "endIndex": 8
+                  },
+                  "isOptional": false
                 }
               ],
               "isOptional": false,
@@ -2694,11 +2947,11 @@
             {
               "kind": "Method",
               "canonicalReference": "@openfunction/functions-framework!Plugin_2#get:member(1)",
-              "docComment": "/**\n * get instance filed value.\n *\n * @param filedName - the instace filedName\n *\n * @returns filed value.\n */\n",
+              "docComment": "/**\n * Get the value of a property on the plugin.\n *\n * @param prop - The property to get.\n *\n * @returns The value of the property.\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "get(filedName: "
+                  "text": "get(prop: "
                 },
                 {
                   "kind": "Content",
@@ -2710,7 +2963,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "string"
+                  "text": "any"
                 },
                 {
                   "kind": "Content",
@@ -2727,7 +2980,7 @@
               "overloadIndex": 1,
               "parameters": [
                 {
-                  "parameterName": "filedName",
+                  "parameterName": "prop",
                   "parameterTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
@@ -2740,12 +2993,12 @@
             },
             {
               "kind": "Property",
-              "canonicalReference": "@openfunction/functions-framework!Plugin_2.OFN_PLUGIN_NAME:member",
-              "docComment": "",
+              "canonicalReference": "@openfunction/functions-framework!Plugin_2#name:member",
+              "docComment": "/**\n * Name of the plugin.\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "static OFN_PLUGIN_NAME: "
+                  "text": "readonly name: "
                 },
                 {
                   "kind": "Content",
@@ -2756,25 +3009,25 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
+              "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
-              "name": "OFN_PLUGIN_NAME",
+              "name": "name",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": true,
+              "isStatic": false,
               "isProtected": false
             },
             {
               "kind": "Property",
-              "canonicalReference": "@openfunction/functions-framework!Plugin_2.OFN_PLUGIN_VERSION:member",
-              "docComment": "",
+              "canonicalReference": "@openfunction/functions-framework!Plugin_2#version:member",
+              "docComment": "/**\n * Version of the plugin.\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "static OFN_PLUGIN_VERSION: "
+                  "text": "readonly version: "
                 },
                 {
                   "kind": "Content",
@@ -2785,15 +3038,15 @@
                   "text": ";"
                 }
               ],
-              "isReadonly": false,
+              "isReadonly": true,
               "isOptional": false,
               "releaseTag": "Public",
-              "name": "OFN_PLUGIN_VERSION",
+              "name": "version",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
               },
-              "isStatic": true,
+              "isStatic": false,
               "isProtected": false
             }
           ],

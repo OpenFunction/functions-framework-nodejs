@@ -21,19 +21,10 @@ import * as functions from '../../src/index';
 import {getTestServer} from '../../src/testing';
 import {FUNCTION_STATUS_HEADER_FIELD} from '../../src/types';
 
+import {Plain} from '../data/mock/payload';
+
 // A structured CloudEvent
-const TEST_CLOUD_EVENT = {
-  specversion: '1.0',
-  type: 'com.google.cloud.storage',
-  source: 'https://github.com/OpenFunction/functions-framework-nodejs',
-  subject: 'test-subject',
-  id: 'test-1234-1234',
-  time: '2020-05-13T01:23:45Z',
-  datacontenttype: 'application/json',
-  data: {
-    some: 'payload',
-  },
-};
+const TEST_CLOUD_EVENT = Plain.CE!;
 
 const TEST_EXTENSIONS = {
   traceparent: '00-65088630f09e0a5359677a7429456db7-97f23477fb2bf5ec-01',
