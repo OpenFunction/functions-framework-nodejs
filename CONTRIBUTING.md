@@ -20,6 +20,16 @@ All submissions, including submissions by project members, require review. We us
 
 ## Testing
 
+### Debugging in VS Code
+
+VS Code provides awesome Node.js debugging features, including the ability to automatically attach debugging to certain Node.js processes that have been launched from VS Code's Integrated Terminal.
+
+Please refer this [guide](https://code.visualstudio.com/docs/nodejs/nodejs-debugging#_auto-attach) to toggle "Auto Attach" feature, and the default `smart` mode is already good enough for debugging our framework.
+
+Once set up Auto Attach, you can create some breakpoints in your codes and run `npm t` in VS Code's Integrated Terminal to check whether the breakpoints work as expected.
+
+> After enabling Auto Attach, you'll need to restart your terminal. This can be done by clicking the ⚠ icon in the top right of the terminal, or just creating a new one.
+
 ### Unit Tests
 
 All pull requests should have an associated test to ensure foward compatibility.
