@@ -20,9 +20,16 @@ export const SKYWALKINGNAME = 'skywalking';
 class Trace {
   private span: Span;
   private spanContext: Context;
-  constructor(span: Span, spanContext: Context) {
-    this.span = span;
-    this.spanContext = spanContext;
+
+  constructor() {
+    this.spanContext = ContextManager.hasContext
+      ? ContextManager.current
+      : new SpanContext();
+
+    this.span = this.spanContext.newEntrySpan(
+      `/${systemInfoStore[SystemInfoItem.FunctionName]}`,
+      undefined
+    );
   }
 
   async start(tags: Array<Tag>) {
@@ -52,6 +59,8 @@ export class SkyWalkingPlugin extends Plugin {
 
   constructor(traceConfig: TraceConfig) {
     super(SKYWALKINGNAME, 'v1');
+
+    // Start skywalking agent
     agent.start({
       serviceName: systemInfoStore[SystemInfoItem.FunctionName],
       serviceInstance: systemInfoStore[SystemInfoItem.Instance],
@@ -81,16 +90,7 @@ export class SkyWalkingPlugin extends Plugin {
     if (ctx === null) {
       console.warn('OpenFunctionRuntime [ctx] is null');
     }
-
-    const context = ContextManager.hasContext
-      ? ContextManager.current
-      : new SpanContext();
-
-    const span = context.newEntrySpan(
-      `/${systemInfoStore[SystemInfoItem.FunctionName]}`,
-      undefined
-    );
-    this.trace = new Trace(span, context);
+    this.trace = new Trace();
     await this.trace.start(this.tags);
   }
 
