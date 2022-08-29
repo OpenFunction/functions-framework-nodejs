@@ -23,13 +23,9 @@ jobs:
         uses: dapr/setup-dapr@v1
         with:
           version: '1.8.0'
-      - name: Install Docker & install skywalking oapServer
+      - name: Install Docker for macOS
         uses: docker-practice/actions-setup-docker@master
-      - run: |
-          docker version
-          docker pull apache/skywalking-oap-server:8.4.0-es6
-          docker run -d --name oap -p 12800:12800 -p 11800:11800 apache/skywalking-oap-server:8.4.0-es6
-          docker ps
+        if: ${{ matrix.platform == 'macos-latest' }}
       - name: Initialize Dapr
         run: dapr init -s --runtime-version ${{ matrix.dapr-version }}
       - name: Install dependencies
