@@ -5,6 +5,7 @@ import {fill, get, random, range} from 'lodash';
 
 import {PluginStore, Plugin} from '../src/openfunction/plugin';
 import {getFunctionPlugins} from '../src/loader';
+import {FrameworkOptions} from '../src/options';
 
 class Concater extends Plugin {
   index = 0;
@@ -21,7 +22,12 @@ class Concater extends Plugin {
 }
 
 describe('Store for custom and builtin plugins', () => {
-  before(async () => await getFunctionPlugins(process.cwd() + '/test/data'));
+  before(
+    async () =>
+      await getFunctionPlugins({
+        sourceLocation: process.cwd() + '/test/data',
+      } as FrameworkOptions)
+  );
 
   const customs = PluginStore.Instance();
 

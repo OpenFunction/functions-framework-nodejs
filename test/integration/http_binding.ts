@@ -10,6 +10,7 @@ import {OpenFunctionRuntime} from '../../src/functions';
 import {getServer} from '../../src/server';
 import {getFunctionPlugins} from '../../src/loader';
 import {FUNCTION_STATUS_HEADER_FIELD} from '../../src/types';
+import {FrameworkOptions} from '../../src/options';
 
 import {Context, Payload} from '../data/mock';
 
@@ -32,7 +33,9 @@ describe('OpenFunction - HTTP Binding', () => {
       }
     );
 
-    getFunctionPlugins(process.cwd() + '/test/data').then(() => {
+    getFunctionPlugins({
+      sourceLocation: process.cwd() + '/test/data',
+    } as FrameworkOptions).then(() => {
       // Wait 5 seconds for dapr sidecar to start
       setTimeout(done, 5000);
     });

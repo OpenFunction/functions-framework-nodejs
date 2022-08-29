@@ -38,6 +38,10 @@ export interface OpenFunctionContext {
    * Optional plugins to be executed after user function.
    */
   postPlugins?: string[];
+  /**
+   * Optional trace config
+   */
+  tracing?: TraceConfig;
 }
 
 /**
@@ -146,4 +150,44 @@ export class ContextUtils {
   static IsPubSubComponent(component: OpenFunctionComponent): boolean {
     return component?.componentType.split('.')[0] === ComponentType.PubSub;
   }
+}
+
+/**
+ * The config of the trace.
+ * @public
+ */
+export interface TraceConfig {
+  /**
+   * This is trace switch
+   */
+  enabled: boolean;
+  /**
+   * Trace Provider
+   */
+  provider?: TraceProvider;
+  /**
+   * Trace tags
+   */
+  tags: Record<string, string>;
+  /**
+   * Trace baggage
+   */
+  baggage: Record<string, string>;
+}
+
+/**
+ * The trace provider info.
+ * @public
+ */
+export interface TraceProvider {
+  /**
+   * Provider name
+   * Now is just support skywalking
+   */
+  name: string;
+  /**
+   * OapServer address
+   * example [skywalking-oap:11800]
+   */
+  oapServer: string;
 }

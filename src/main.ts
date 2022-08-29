@@ -55,7 +55,7 @@ export const main = async () => {
     const {userFunction, signatureType} = loadedFunction;
 
     // Load function plugins before starting server
-    await getFunctionPlugins(options.sourceLocation);
+    await getFunctionPlugins(options);
 
     // Try to determine the server runtime
     // Considering the async runtime in the first place

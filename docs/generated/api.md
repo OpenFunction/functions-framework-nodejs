@@ -139,6 +139,7 @@ export interface OpenFunctionContext {
     postPlugins?: string[];
     prePlugins?: string[];
     runtime: `${RuntimeType}` | `${Capitalize<RuntimeType>}` | `${Uppercase<RuntimeType>}`;
+    tracing?: TraceConfig;
     version: string;
 }
 
@@ -186,6 +187,20 @@ export { Response_2 as Response }
 export enum RuntimeType {
     Async = "async",
     Knative = "knative"
+}
+
+// @public
+export interface TraceConfig {
+    baggage: Record<string, string>;
+    enabled: boolean;
+    provider?: TraceProvider;
+    tags: Record<string, string>;
+}
+
+// @public
+export interface TraceProvider {
+    name: string;
+    oapServer: string;
 }
 
 // (No @packageDocumentation comment for this package)

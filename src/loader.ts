@@ -31,6 +31,14 @@ import {Plugin, PluginStore, PluginMap} from './openfunction/plugin';
 import {HandlerFunction} from './functions';
 import {getRegisteredFunction} from './function_registry';
 import {SignatureType} from './types';
+import {FrameworkOptions} from './options';
+import {OpenFunctionContext} from './openfunction/context';
+import {
+  SKYWALKINGNAME,
+  SkyWalkingPlugin,
+} from './openfunction/plugin/skywalking/skywalking';
+
+import {SystemInfoItem, systemInfoStore} from './openfunction/system_info';
 
 // Dynamic import function required to load user code packaged as an
 // ES module is only available on Node.js v13.2.0 and up.
@@ -214,9 +222,12 @@ function getFunctionModulePath(codeLocation: string): string | null {
  * @return A named plugin map object or null.
  */
 export async function getFunctionPlugins(
-  codeLocation: string
+  options: FrameworkOptions
 ): Promise<PluginMap | null> {
-  const files = getPluginsModulePath(codeLocation);
+  // First load BUIDIN type plugin
+  await loadBuidInPlugins(options);
+
+  const files = getPluginsModulePath(options.sourceLocation);
   if (!files) return null;
 
   // Try to load all plugin module files
@@ -271,4 +282,47 @@ function getPluginsModulePath(codeLocation: string): string[] | null {
     console.error('Fail to load plugins: %s', ex);
     return null;
   }
+}
+
+/**
+ * It loads BUIDIN type plugins from the /openfunction/plugin.
+ * @param context - The context of OpenFunction.
+ */
+async function loadBuidInPlugins(options: FrameworkOptions) {
+  if (!options.context) {
+    console.warn("The context is undefined can't load BUIDIN type plugins");
+    return;
+  }
+  const store = PluginStore.Instance(PluginStore.Type.BUILTIN);
+  //Provide system info for BUILDIN type plugins
+  systemInfoStore[SystemInfoItem.FunctionName] = options.target;
+  systemInfoStore[SystemInfoItem.RuntimeType] =
+    options.context.runtime || 'knative';
+
+  if (checkTraceConfig(options.context)) {
+    const skywalking = new SkyWalkingPlugin(options.context.tracing!);
+    store.register(skywalking);
+  }
+}
+
+/**
+ * It check trace config ,it will set default value if it is enbaled.
+ * @param tracing - The config of TraceConfig.
+ */
+function checkTraceConfig(context: OpenFunctionContext): boolean {
+  if (!context.tracing) {
+    console.warn('TraceConfig is invalid');
+    return false;
+  }
+  if (!context.tracing.enabled) {
+    return false;
+  }
+
+  //Set default trace provider config
+  context.tracing.provider = {
+    name: context.tracing.provider?.name || SKYWALKINGNAME,
+    oapServer: context.tracing.provider?.oapServer || '127.0.0.1:11800',
+  };
+
+  return true;
 }

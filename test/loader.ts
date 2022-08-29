@@ -19,6 +19,7 @@ import * as semver from 'semver';
 
 import {http, cloudEvent, HttpFunction} from '../src';
 import * as loader from '../src/loader';
+import {FrameworkOptions} from '../src/options';
 
 describe('Load function and plugins', () => {
   interface TestData {
@@ -132,9 +133,9 @@ describe('Load function and plugins', () => {
   });
 
   it('should only load valid plugin class and ignore other', async () => {
-    const loadedPlugins = await loader.getFunctionPlugins(
-      process.cwd() + '/test/data'
-    );
+    const loadedPlugins = await loader.getFunctionPlugins({
+      sourceLocation: process.cwd() + '/test/data',
+    } as FrameworkOptions);
     assert.ok(loadedPlugins);
 
     ['noname'].forEach(v => assert.ok(!loadedPlugins[v]));
