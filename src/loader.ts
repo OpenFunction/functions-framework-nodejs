@@ -38,8 +38,6 @@ import {
   SkyWalkingPlugin,
 } from './openfunction/plugin/skywalking/skywalking';
 
-import {SystemInfoItem, systemInfoStore} from './openfunction/system_info';
-
 // Dynamic import function required to load user code packaged as an
 // ES module is only available on Node.js v13.2.0 and up.
 //   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#browser_compatibility
@@ -222,12 +220,9 @@ function getFunctionModulePath(codeLocation: string): string | null {
  * @return A named plugin map object or null.
  */
 export async function getFunctionPlugins(
-  options: FrameworkOptions
+  codeLocation: string
 ): Promise<PluginMap | null> {
-  // First load BUIDIN type plugin
-  await loadBuidInPlugins(options);
-
-  const files = getPluginsModulePath(options.sourceLocation);
+  const files = getPluginsModulePath(codeLocation);
   if (!files) return null;
 
   // Try to load all plugin module files
@@ -288,19 +283,16 @@ function getPluginsModulePath(codeLocation: string): string[] | null {
  * It loads BUIDIN type plugins from the /openfunction/plugin.
  * @param context - The context of OpenFunction.
  */
-async function loadBuidInPlugins(options: FrameworkOptions) {
+export async function loadBuidInPlugins(options: FrameworkOptions) {
   if (!options.context) {
     console.warn("The context is undefined can't load BUIDIN type plugins");
     return;
   }
   const store = PluginStore.Instance(PluginStore.Type.BUILTIN);
   //Provide system info for BUILDIN type plugins
-  systemInfoStore[SystemInfoItem.FunctionName] = options.target;
-  systemInfoStore[SystemInfoItem.RuntimeType] =
-    options.context.runtime || 'knative';
 
   if (checkTraceConfig(options.context)) {
-    const skywalking = new SkyWalkingPlugin(options.context.tracing!);
+    const skywalking = new SkyWalkingPlugin(options);
     store.register(skywalking);
   }
 }
@@ -317,7 +309,9 @@ function checkTraceConfig(context: OpenFunctionContext): boolean {
   if (!context.tracing.enabled) {
     return false;
   }
-
+  if (!context.tracing.tags) {
+    context.tracing.tags = {};
+  }
   //Set default trace provider config
   context.tracing.provider = {
     name: context.tracing.provider?.name || SKYWALKINGNAME,

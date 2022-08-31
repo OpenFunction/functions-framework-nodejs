@@ -7,7 +7,6 @@ import * as MQTT from 'aedes';
 
 import getAysncServer from '../../src/openfunction/async_server';
 import {getFunctionPlugins} from '../../src/loader';
-import {FrameworkOptions} from '../../src/options';
 
 import {Context, Payload} from '../data/mock';
 
@@ -144,9 +143,7 @@ describe('OpenFunction - Async', () => {
   });
 
   it('mqtt binding w/ custom plugins', done => {
-    getFunctionPlugins({
-      sourceLocation: process.cwd() + '/test/data',
-    } as FrameworkOptions).then(plugins => {
+    getFunctionPlugins(process.cwd() + '/test/data').then(plugins => {
       const start = get(plugins!.numbers, 'oct');
 
       const app = getAysncServer(

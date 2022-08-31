@@ -10,7 +10,7 @@ import Context from 'skywalking-backend-js/lib/trace/context/Context';
 import {Plugin} from '../../plugin';
 import {OpenFunctionRuntime} from '../../runtime';
 import {TraceConfig} from '../../context';
-import {SystemInfoItem, systemInfoStore} from '../../system_info';
+import {FrameworkOptions} from '../../../options';
 
 // https://github.com/apache/skywalking/blob/master/oap-server/server-starter/src/main/resources/component-libraries.yml#L515
 const componentIDOpenFunction = new Component(5013);
@@ -21,18 +21,15 @@ class Trace {
   private span: Span;
   private spanContext: Context;
 
-  constructor() {
+  constructor(functionName: string) {
     this.spanContext = ContextManager.hasContext
       ? ContextManager.current
       : new SpanContext();
 
-    this.span = this.spanContext.newEntrySpan(
-      `/${systemInfoStore[SystemInfoItem.FunctionName]}`,
-      undefined
-    );
+    this.span = this.spanContext.newEntrySpan(`/${functionName}`, undefined);
   }
 
-  async start(tags: Array<Tag>) {
+  async start(tags: Array<Tag>): Promise<string> {
     forEach(tags, tag => {
       this.span.tag(tag);
     });
@@ -40,6 +37,7 @@ class Trace {
     this.span.component = componentIDOpenFunction;
     this.span.start();
     this.span.async();
+    return this.spanContext.traceId();
   }
 
   async stop() {
@@ -56,23 +54,29 @@ class Trace {
 export class SkyWalkingPlugin extends Plugin {
   private trace: Trace | undefined;
   private tags: Array<Tag> = [];
+  private functionName = 'function';
 
-  constructor(traceConfig: TraceConfig) {
+  constructor(options: FrameworkOptions) {
     super(SKYWALKINGNAME, 'v1');
+
+    this.functionName = options.target;
 
     // Start skywalking agent
     agent.start({
-      serviceName: systemInfoStore[SystemInfoItem.FunctionName],
-      serviceInstance: systemInfoStore[SystemInfoItem.Instance],
-      collectorAddress: traceConfig.provider?.oapServer,
+      serviceName: this.functionName,
+      serviceInstance: 'openfunctionInstance',
+      collectorAddress: options.context!.tracing!.provider!.oapServer,
     });
 
-    this.iniAttribute(traceConfig);
+    if (!options.context!.tracing!.tags) {
+      options.context!.tracing!.tags = {};
+    }
+    options.context!.tracing!.tags!['RuntimeType'] =
+      options.context?.runtime || 'Knative';
+    this.iniAttribute(options.context!.tracing!);
   }
 
   iniAttribute(traceConfig: TraceConfig) {
-    traceConfig.tags[SystemInfoItem.RuntimeType] =
-      systemInfoStore[SystemInfoItem.RuntimeType];
     for (const key in traceConfig.tags) {
       this.tags.push({
         key,
@@ -89,9 +93,11 @@ export class SkyWalkingPlugin extends Plugin {
   ) {
     if (ctx === null) {
       console.warn('OpenFunctionRuntime [ctx] is null');
+      return;
     }
-    this.trace = new Trace();
-    await this.trace.start(this.tags);
+    this.trace = new Trace(this.functionName);
+    const traceId = await this.trace.start(this.tags);
+    ctx.locals.traceId = traceId;
   }
 
   async execPostHook(
@@ -101,6 +107,7 @@ export class SkyWalkingPlugin extends Plugin {
   ) {
     if (ctx === null) {
       console.warn('OpenFunctionRuntime [ctx] is null');
+      return;
     }
     await this.trace?.stop();
   }

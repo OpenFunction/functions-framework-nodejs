@@ -23,7 +23,7 @@ import {createHttpTerminator} from 'http-terminator';
 import getAysncServer from './openfunction/async_server';
 import {OpenFunctionContext, ContextUtils} from './openfunction/context';
 
-import {getUserFunction, getFunctionPlugins} from './loader';
+import {getUserFunction, getFunctionPlugins, loadBuidInPlugins} from './loader';
 import {ErrorHandler} from './invoker';
 import {getServer} from './server';
 import {parseOptions, helpText, OptionsError} from './options';
@@ -54,8 +54,10 @@ export const main = async () => {
     }
     const {userFunction, signatureType} = loadedFunction;
 
+    // First load BUIDIN type plugin
+    await loadBuidInPlugins(options);
     // Load function plugins before starting server
-    await getFunctionPlugins(options);
+    await getFunctionPlugins(options.sourceLocation);
 
     // Try to determine the server runtime
     // Considering the async runtime in the first place

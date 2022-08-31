@@ -168,11 +168,11 @@ export interface TraceConfig {
   /**
    * Trace tags
    */
-  tags: Record<string, string>;
+  tags?: Record<string, string>;
   /**
    * Trace baggage
    */
-  baggage: Record<string, string>;
+  baggage?: Record<string, string>;
 }
 
 /**

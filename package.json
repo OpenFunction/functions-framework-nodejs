@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@dapr/dapr": "2.3.1",
+    "axios": "^0.27.2",
     "body-parser": "^1.20.0",
     "cloudevents": "^6.0.2",
     "debug": "^4.3.4",

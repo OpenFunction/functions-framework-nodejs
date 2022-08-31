@@ -1,0 +1,41 @@
+name: Node.js Unit CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  test:
+    strategy:
+      matrix:
+        node-version: [16]
+        dapr-version: [1.6.3, 1.7.4, 1.8.3]
+        platform: [ubuntu-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install Dapr
+        uses: dapr/setup-dapr@v1
+        with:
+          version: '1.8.0'
+      - name: Install Docker & start skywalking oap ui
+        uses: docker-practice/actions-setup-docker@master
+      - run: |
+          docker version
+          docker pull apache/skywalking-oap-server:8.4.0-es6
+          docker run -d --name oap -p 12800:12800 -p 11800:11800 apache/skywalking-oap-server:8.4.0-es6
+          docker run -d --name ui -p 8088:8080 -e SW_OAP_ADDRESS=127.0.0.1:12800 apache/skywalking-ui:8.4.0
+          docker ps
+      - name: Initialize Dapr
+        run: dapr init -s --runtime-version ${{ matrix.dapr-version }}
+      - name: Install dependencies
+        run: npm install
+      - name: Build TypeScript project
+        run: npm run build --if-present
+      - name: Test
+        run: npm test
