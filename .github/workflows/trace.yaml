@@ -1,8 +1,8 @@
-name: Node.js Unit CI
+name: Node.js Trace CI
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
 jobs:
   test:
@@ -29,12 +29,16 @@ jobs:
           docker version
           docker pull apache/skywalking-oap-server:8.4.0-es6
           docker run -d --name oap -p 12800:12800 -p 11800:11800 apache/skywalking-oap-server:8.4.0-es6
-          docker run -d --name ui -p 8088:8080 -e SW_OAP_ADDRESS=127.0.0.1:12800 apache/skywalking-ui:8.4.0
           docker ps
       - name: Initialize Dapr
         run: dapr init -s --runtime-version ${{ matrix.dapr-version }}
       - name: Install dependencies
         run: npm install
+      - name: Sleep for 30 seconds <wait for oap server>
+        run: |
+          sleep 30s
+          docker ps
+        shell: bash
       - name: Build TypeScript project
         run: npm run build --if-present
       - name: Test

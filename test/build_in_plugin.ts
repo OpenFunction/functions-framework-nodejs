@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import {createConnection} from 'net';
+
 import axios from 'axios';
 
 import {loadBuidInPlugins} from '../src/loader';
@@ -48,15 +49,15 @@ const checkConnection = (host: string, port: number, timeout: number) => {
 };
 export const check = async () => {
   try {
-    await checkConnection('127.0.0.1', 8081, 3000);
+    await checkConnection('127.0.0.1', 12800, 3000);
   } catch (error) {
-    console.warn('127.0.0.1:8088 has no server');
+    console.warn('127.0.0.1:12800 has no server');
     return false;
   }
   return true;
 };
 
-const UIServer = '127.0.0.1:8088';
+const UIServer = '127.0.0.1:12800';
 
 describe('BuildIn plugin', () => {
   const options = {
@@ -70,7 +71,7 @@ describe('BuildIn plugin', () => {
   };
 
   it('skywalking plugin', async () => {
-    if (!check()) {
+    if (!(await check())) {
       return;
     }
     await loadBuidInPlugins(options as FrameworkOptions);
