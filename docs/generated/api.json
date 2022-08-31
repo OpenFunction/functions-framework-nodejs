@@ -3218,7 +3218,7 @@
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "baggage: "
+                  "text": "baggage?: "
                 },
                 {
                   "kind": "Reference",
@@ -3235,7 +3235,7 @@
                 }
               ],
               "isReadonly": false,
-              "isOptional": false,
+              "isOptional": true,
               "releaseTag": "Public",
               "name": "baggage",
               "propertyTypeTokenRange": {
@@ -3305,7 +3305,7 @@
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "tags: "
+                  "text": "tags?: "
                 },
                 {
                   "kind": "Reference",
@@ -3322,7 +3322,7 @@
                 }
               ],
               "isReadonly": false,
-              "isOptional": false,
+              "isOptional": true,
               "releaseTag": "Public",
               "name": "tags",
               "propertyTypeTokenRange": {

@@ -191,10 +191,10 @@ export enum RuntimeType {
 
 // @public
 export interface TraceConfig {
-    baggage: Record<string, string>;
+    baggage?: Record<string, string>;
     enabled: boolean;
     provider?: TraceProvider;
-    tags: Record<string, string>;
+    tags?: Record<string, string>;
 }
 
 // @public
