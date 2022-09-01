@@ -29,13 +29,14 @@ jobs:
       - name: Install Docker for ubuntu
         uses: docker-practice/actions-setup-docker@master
         if: ${{ matrix.platform == 'ubuntu-latest' }}
-      - name: Install SkyWalking
+      - name: Install SkyWalking And Wait for it start
       - run: |
           docker version
           docker pull apache/skywalking-oap-server:8.4.0-es6
           docker run -d --name oap -p 12800:12800 -p 11800:11800 apache/skywalking-oap-server:8.4.0-es6
           docker ps
           sleep 20s
+        shell: bash
       - name: Initialize Dapr
         run: dapr init -s --runtime-version ${{ matrix.dapr-version }}
       - name: Install dependencies
