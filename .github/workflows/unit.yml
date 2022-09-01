@@ -26,6 +26,16 @@ jobs:
       - name: Install Docker for macOS
         uses: docker-practice/actions-setup-docker@master
         if: ${{ matrix.platform == 'macos-latest' }}
+      - name: Install Docker for ubuntu
+        uses: docker-practice/actions-setup-docker@master
+        if: ${{ matrix.platform == 'ubuntu-latest' }}
+      - name: Install SkyWalking
+      - run: |
+          docker version
+          docker pull apache/skywalking-oap-server:8.4.0-es6
+          docker run -d --name oap -p 12800:12800 -p 11800:11800 apache/skywalking-oap-server:8.4.0-es6
+          docker ps
+          sleep 20s
       - name: Initialize Dapr
         run: dapr init -s --runtime-version ${{ matrix.dapr-version }}
       - name: Install dependencies

@@ -115,8 +115,8 @@ export abstract class OpenFunctionRuntime {
       await userFunction(ctx, data);
 
       // Execute pre hooks, system plugins go last
-      await userPlugins.execPostHooks(ctx);
       await sysPlugins.execPostHooks(ctx);
+      await userPlugins.execPostHooks(ctx);
     };
   }
 

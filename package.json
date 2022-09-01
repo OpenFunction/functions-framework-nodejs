@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@dapr/dapr": "2.3.1",
-    "axios": "^0.27.2",
     "body-parser": "^1.20.0",
     "cloudevents": "^6.0.2",
     "debug": "^4.3.4",
@@ -23,6 +22,7 @@
     "http-terminator": "^3.2.0",
     "lodash": "^4.17.21",
     "minimist": "^1.2.6",
+    "node-fetch": "2.6.5np",
     "on-finished": "^2.4.1",
     "read-pkg-up": "^7.0.1",
     "semver": "^7.3.7",

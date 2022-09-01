@@ -157,6 +157,7 @@ describe('OpenFunction - Async', () => {
 
           // Passthrough test done handler
           ctx.locals.done = done;
+          ctx.locals.app = app;
         },
         {
           ...TEST_CONTEXT,

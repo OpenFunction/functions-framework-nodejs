@@ -294,6 +294,8 @@ export async function loadBuidInPlugins(options: FrameworkOptions) {
   if (checkTraceConfig(options.context)) {
     const skywalking = new SkyWalkingPlugin(options);
     store.register(skywalking);
+    options.context.prePlugins?.push(SKYWALKINGNAME);
+    options.context.postPlugins?.push(SKYWALKINGNAME);
   }
 }
 

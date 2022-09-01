@@ -49,7 +49,10 @@ export class Countdown extends Plugin {
     this.countdown(ctx, plugins);
 
     // Try to end the test if necessary
-    if (this.current === this.end) ctx.locals.done?.();
+    if (this.current === this.end) {
+      ctx.locals.app.stop();
+      ctx.locals.done?.();
+    }
   }
 
   countdown(ctx, plugins) {
