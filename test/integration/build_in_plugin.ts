@@ -223,9 +223,6 @@ describe('Build in plugin', () => {
     notStrictEqual(target, null);
     deepStrictEqual(target.endpointName, `/${options.target}`);
 
-    const ms = target.endTime - target.startTime;
-    ok(ms >= 2000);
-    ok(ms <= 3000);
     for (const tag in target.tags) {
       if (tag === 'RuntimeType') {
         ok(target.tags[tag] === options.context.runtime);
