@@ -10,37 +10,40 @@ jobs:
       matrix:
         node-version: [16]
         dapr-version: [1.6.3, 1.7.4, 1.8.3]
-        platform: [ubuntu-latest]
+        platform:
+          - ubuntu-latest
+          - macos-latest
+
     runs-on: ${{ matrix.platform }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Install Docker
+        uses: docker-practice/actions-setup-docker@master
+
+      - name: Install and Run SkyWalking
+        run: docker run -d --name oap -p 12800:12800 -p 11800:11800 apache/skywalking-oap-server:8.4.0-es6
+
+      - name: Install Dapr CLI
+        uses: dapr/setup-dapr@v1
+        with:
+          version: '1.8.0'
+
+      - name: Initialize Dapr Runtime
+        run: dapr init -s --runtime-version ${{ matrix.dapr-version }}
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install Dapr
-        uses: dapr/setup-dapr@v1
-        with:
-          version: '1.8.0'
-      - name: Install Docker for macOS
-        uses: docker-practice/actions-setup-docker@master
-        if: ${{ matrix.platform == 'macos-latest' }}
-      - name: Install Docker for ubuntu
-        uses: docker-practice/actions-setup-docker@master
-        if: ${{ matrix.platform == 'ubuntu-latest' }}
-      - name: Install skywalking and wait for it start
-        run: |
-          docker version
-          docker pull apache/skywalking-oap-server:8.4.0-es6
-          docker run -d --name oap -p 12800:12800 -p 11800:11800 apache/skywalking-oap-server:8.4.0-es6
-          docker ps
-          sleep 20s
-      - name: Initialize Dapr
-        run: dapr init -s --runtime-version ${{ matrix.dapr-version }}
-      - name: Install dependencies
+
+      - name: Install Project Dependencies
         run: npm install
-      - name: Build TypeScript project
+
+      - name: Build TypeScript Project
         run: npm run build --if-present
-      - name: Test
+
+      - name: Run Tests
         run: npm test
