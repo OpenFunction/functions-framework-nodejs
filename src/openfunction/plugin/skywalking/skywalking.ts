@@ -65,15 +65,15 @@ export class SkyWalkingPlugin extends Plugin {
     agent.start({
       serviceName: this.functionName,
       serviceInstance: 'openfunctionInstance',
-      collectorAddress: options.context!.tracing!.provider!.oapServer,
+      collectorAddress: options.context!.pluginsTracing!.provider!.oapServer,
     });
 
-    if (!options.context!.tracing!.tags) {
-      options.context!.tracing!.tags = {};
+    if (!options.context!.pluginsTracing!.tags) {
+      options.context!.pluginsTracing!.tags = {};
     }
-    options.context!.tracing!.tags!['RuntimeType'] =
+    options.context!.pluginsTracing!.tags!['RuntimeType'] =
       options.context?.runtime || 'Knative';
-    this.iniAttribute(options.context!.tracing!);
+    this.iniAttribute(options.context!.pluginsTracing!);
   }
 
   iniAttribute(traceConfig: TraceConfig) {

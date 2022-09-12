@@ -146,7 +146,7 @@ describe('Build in plugin', () => {
       printHelp: false,
       context: {
         ...TEST_CONTEXT,
-        tracing: {
+        pluginsTracing: {
           enabled: true,
         },
         prePlugins: ['assist'],
@@ -190,7 +190,7 @@ describe('Build in plugin', () => {
       target: 'test',
       context: {
         ...TEST_CONTEXT,
-        tracing: {
+        pluginsTracing: {
           enabled: true,
         },
       },

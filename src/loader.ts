@@ -304,20 +304,20 @@ export async function loadBuidInPlugins(options: FrameworkOptions) {
  * @param tracing - The config of TraceConfig.
  */
 function checkTraceConfig(context: OpenFunctionContext): boolean {
-  if (!context.tracing) {
+  if (!context.pluginsTracing) {
     console.warn('TraceConfig is invalid');
     return false;
   }
-  if (!context.tracing.enabled) {
+  if (!context.pluginsTracing.enabled) {
     return false;
   }
-  if (!context.tracing.tags) {
-    context.tracing.tags = {};
+  if (!context.pluginsTracing.tags) {
+    context.pluginsTracing.tags = {};
   }
   //Set default trace provider config
-  context.tracing.provider = {
-    name: context.tracing.provider?.name || SKYWALKINGNAME,
-    oapServer: context.tracing.provider?.oapServer || '127.0.0.1:11800',
+  context.pluginsTracing.provider = {
+    name: context.pluginsTracing.provider?.name || SKYWALKINGNAME,
+    oapServer: context.pluginsTracing.provider?.oapServer || '127.0.0.1:11800',
   };
 
   return true;

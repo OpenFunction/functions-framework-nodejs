@@ -41,7 +41,7 @@ export interface OpenFunctionContext {
   /**
    * Optional trace config
    */
-  tracing?: TraceConfig;
+  pluginsTracing?: TraceConfig;
 }
 
 /**
