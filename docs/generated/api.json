@@ -1888,6 +1888,34 @@
             },
             {
               "kind": "PropertySignature",
+              "canonicalReference": "@openfunction/functions-framework!OpenFunctionContext#pluginsTracing:member",
+              "docComment": "/**\n * Optional trace config\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "pluginsTracing?: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "TraceConfig",
+                  "canonicalReference": "@openfunction/functions-framework!TraceConfig:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": true,
+              "releaseTag": "Public",
+              "name": "pluginsTracing",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
               "canonicalReference": "@openfunction/functions-framework!OpenFunctionContext#port:member",
               "docComment": "/**\n * Optional port string of the server.\n */\n",
               "excerptTokens": [
@@ -2037,34 +2065,6 @@
               "propertyTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 12
-              }
-            },
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "@openfunction/functions-framework!OpenFunctionContext#tracing:member",
-              "docComment": "/**\n * Optional trace config\n */\n",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "tracing?: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "TraceConfig",
-                  "canonicalReference": "@openfunction/functions-framework!TraceConfig:interface"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "isReadonly": false,
-              "isOptional": true,
-              "releaseTag": "Public",
-              "name": "tracing",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
               }
             },
             {

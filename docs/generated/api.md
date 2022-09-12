@@ -135,11 +135,11 @@ export interface OpenFunctionContext {
     inputs?: OpenFunctionBinding;
     name: string;
     outputs?: OpenFunctionBinding;
+    pluginsTracing?: TraceConfig;
     port?: string;
     postPlugins?: string[];
     prePlugins?: string[];
     runtime: `${RuntimeType}` | `${Capitalize<RuntimeType>}` | `${Uppercase<RuntimeType>}`;
-    tracing?: TraceConfig;
     version: string;
 }
 
