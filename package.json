@@ -63,7 +63,7 @@
     "@types/google-protobuf": "^3.15.6",
     "@types/lodash": "^4.14.184",
     "@types/minimist": "1.2.2",
-    "@types/mocha": "9.1.1",
+    "@types/mocha": "10.0.0",
     "@types/node": "14.18.11",
     "@types/node-fetch": "^2.6.2",
     "@types/on-finished": "2.3.1",
