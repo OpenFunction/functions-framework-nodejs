@@ -70,7 +70,7 @@
     "@types/shelljs": "^0.8.11",
     "@types/sinon": "10.0.11",
     "@types/supertest": "2.0.12",
-    "aedes": "0.47.0",
+    "aedes": "0.48.1",
     "clean-pkg-json": "^1.2.0",
     "concurrently": "^7.5.0",
     "cross-env": "^7.0.3",
