@@ -23,7 +23,7 @@
     "lodash": "^4.17.21",
     "minimist": "^1.2.7",
     "on-finished": "^2.4.1",
-    "read-pkg-up": "^7.0.1",
+    "read-pkg-up": "^10.0.0",
     "semver": "^7.3.8",
     "skywalking-backend-js": "^0.6.0"
   },
