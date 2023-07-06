@@ -20,7 +20,7 @@ import * as process from 'process';
 
 import {createHttpTerminator} from 'http-terminator';
 
-import getAysncServer from './openfunction/async_server';
+import {getAysncServer} from './openfunction/async_server';
 import {ContextUtils} from './openfunction/context';
 
 import {getUserFunction, getFunctionPlugins, getBuiltinPlugins} from './loader';

@@ -15,7 +15,7 @@ export type AsyncFunctionServer = DaprServer;
  * @param context Context of user's function.
  * @return HTTP server.
  */
-export default function (
+export function getAysncServer(
   userFunction: OpenFunction,
   context: OpenFunctionContext
 ): AsyncFunctionServer {
