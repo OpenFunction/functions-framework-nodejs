@@ -42,6 +42,10 @@ export interface OpenFunctionContext {
    * Optional trace plugin config.
    */
   pluginsTracing?: TraceConfig;
+  /**
+   * Optional state store config;
+   */
+  states?: Record<string, ComponentSpec>;
 }
 
 /**
@@ -99,6 +103,10 @@ export enum ComponentType {
    * The pubsub type.
    */
   PubSub = 'pubsub',
+  /**
+   * The state type
+   */
+  State = 'state',
 }
 
 /**
@@ -138,6 +146,14 @@ export class ContextUtils {
    */
   static IsPubSubComponent(component: OpenFunctionComponent): boolean {
     return component?.componentType.split('.')[0] === ComponentType.PubSub;
+  }
+  /**
+   * Checks if the component is a state component.
+   * @param component - The component to check.
+   * @returns A boolean value.
+   */
+  static IsStateComponent(component: ComponentSpec): boolean {
+    return component?.type.split('.')[0] === ComponentType.State;
   }
 }
 
@@ -195,4 +211,23 @@ export enum TraceProviderType {
    * The OpenTelemetry type.
    */
   OpenTelemetry = 'opentelemetry',
+}
+
+/**
+ * The specification of the component
+ * @public
+ */
+export interface ComponentSpec {
+  /**
+   * The name of the state store.
+   */
+  type: `${ComponentType}.${string}`;
+  /**
+   * The version of the component
+   */
+  version: string;
+  /**
+   * Optional metadata as hash map for the component.
+   */
+  metadata?: Record<string, string>;
 }

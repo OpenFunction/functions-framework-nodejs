@@ -1,6 +1,7 @@
 import {
   OpenFunctionContext,
   TraceConfig,
+  ComponentSpec,
 } from '../../../src/openfunction/context';
 
 export const KnativeBase: OpenFunctionContext = {
@@ -85,4 +86,29 @@ export const TracerPluginBase: TraceConfig = {
     key: 'key1',
     value: 'value1',
   },
+};
+
+export const StateStoreBase: Record<string, ComponentSpec> = {
+  redis: {
+    type: 'state.redis',
+    version: 'v1',
+    metadata: {
+      redisHost: 'localhost:6379',
+      redisPassword: '',
+    },
+  },
+  // mysql: {
+  //   type: 'state.mysql',
+  //   version: 'v1',
+  //   metadata: {
+  //     connectionString: '<CONNECTION STRING>',
+  //     schemaName: '<SCHEMA NAME>',
+  //     tableName: '<TABLE NAME>',
+  //     timeoutInSeconds: '30',
+  //     // Required if pemContents not provided. Path to pem file.
+  //     pemPath: '<PEM PATH>',
+  //     // Required if pemPath not provided. Pem value
+  //     pemContents: '<PEM CONTENTS>',
+  //   },
+  // },
 };

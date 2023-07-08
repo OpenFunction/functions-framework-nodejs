@@ -42,9 +42,17 @@ export interface CloudFunctionsContext {
 }
 
 // @public
+export interface ComponentSpec {
+    metadata?: Record<string, string>;
+    type: `${ComponentType}.${string}`;
+    version: string;
+}
+
+// @public
 export enum ComponentType {
     Binding = "bindings",
-    PubSub = "pubsub"
+    PubSub = "pubsub",
+    State = "state"
 }
 
 // @public
@@ -56,6 +64,7 @@ export class ContextUtils {
     static IsBindingComponent(component: OpenFunctionComponent): boolean;
     static IsKnativeRuntime(context: OpenFunctionContext): boolean;
     static IsPubSubComponent(component: OpenFunctionComponent): boolean;
+    static IsStateComponent(component: ComponentSpec): boolean;
 }
 
 // @public
@@ -136,6 +145,7 @@ export interface OpenFunctionContext {
     postPlugins?: string[];
     prePlugins?: string[];
     runtime: `${RuntimeType}` | `${Capitalize<RuntimeType>}` | `${Uppercase<RuntimeType>}`;
+    states?: Record<string, ComponentSpec>;
     version: string;
 }
 
@@ -155,6 +165,14 @@ export abstract class OpenFunctionRuntime {
     get sidecarPort(): {
         HTTP: string;
         GRPC: string;
+    };
+    abstract get state(): {
+        save: (data: object, db?: string) => Promise<object>;
+        get: (data: object, db?: string) => Promise<object>;
+        getBulk: (data: object, db?: string) => Promise<object>;
+        delete: (data: object, db?: string) => Promise<object>;
+        transaction: (data: object, db?: string) => Promise<object>;
+        query: (query: object, db?: string) => Promise<object>;
     };
     // Warning: (ae-forgotten-export) The symbol "OpenFunctionTrigger" needs to be exported by the entry point index.d.ts
     protected trigger?: OpenFunctionTrigger;

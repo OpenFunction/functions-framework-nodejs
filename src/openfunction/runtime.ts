@@ -2,7 +2,12 @@ import {env} from 'process';
 
 import {chain, get, has, extend, isPlainObject} from 'lodash';
 import {Request, Response} from 'express';
+
 import {DaprClient, CommunicationProtocolEnum} from '@dapr/dapr';
+import {KeyValuePairType} from '@dapr/dapr/types/KeyValuePair.type';
+import {OperationType} from '@dapr/dapr/types/Operation.type';
+import {IRequestMetadata} from '@dapr/dapr/types/RequestMetadata.type';
+import {StateQueryType} from '@dapr/dapr/types/state/StateQuery.type';
 
 import {OpenFunction} from '../functions';
 
@@ -10,6 +15,7 @@ import {
   OpenFunctionComponent,
   OpenFunctionContext,
   ContextUtils,
+  ComponentSpec,
 } from './context';
 
 import {Plugin, PluginStore} from './plugin';
@@ -184,6 +190,18 @@ export abstract class OpenFunctionRuntime {
    * The promise that send data to certain ouput.
    */
   abstract send(data: object, output?: string): Promise<object>;
+
+  /**
+   * The state store and its operations
+   */
+  abstract get state(): {
+    save: (data: object, db?: string) => Promise<object>;
+    get: (data: object, db?: string) => Promise<object>;
+    getBulk: (data: object, db?: string) => Promise<object>;
+    delete: (data: object, db?: string) => Promise<object>;
+    transaction: (data: object, db?: string) => Promise<object>;
+    query: (query: object, db?: string) => Promise<object>;
+  };
 }
 
 /**
@@ -242,5 +260,217 @@ class DaprRuntime extends OpenFunctionRuntime {
       .value();
 
     return Promise.allSettled(actions);
+  }
+
+  /**
+   * Save the data to the state store
+   * @param data The data for save operation
+   * @param db The state store to save the data
+   * @returns The promise of the save action being executed.
+   */
+  #save(data: object, db?: string): Promise<object> {
+    if (!this.context.states) {
+      return Promise.resolve([]);
+    }
+    const states = this.context.states;
+    const actions = Object.keys(states)
+      .filter(v => !db || v === db)
+      .map((storeName: string) => {
+        const component: ComponentSpec = states[storeName];
+        if (ContextUtils.IsStateComponent(component)) {
+          return this.daprClient.state.save(
+            storeName,
+            data as KeyValuePairType[]
+          );
+        }
+        return Promise.resolve(undefined);
+      })
+      .values();
+    return Promise.allSettled(actions);
+  }
+
+  /**
+   * Get the data from the state store
+   * @param data The data for get operation
+   * @param db The state store to get the data
+   * @returns The promise of the get action being executed.
+   */
+  #get(data: object, db?: string): Promise<object> {
+    if (!this.context.states) {
+      return Promise.resolve([]);
+    }
+
+    // check the data whether legal
+    const data_length = Object.values(data).length;
+    if (data_length > 1 || data_length <= 0) {
+      throw new Error('State get method: invalid keys number');
+    }
+
+    const states = this.context.states;
+    const actions = Object.keys(states)
+      .filter(v => !db || v === db)
+      .map((storeName: string) => {
+        const component: ComponentSpec = states[storeName];
+        if (ContextUtils.IsStateComponent(component)) {
+          return this.daprClient.state.get(
+            storeName,
+            Object.values(data)[0] as string
+          );
+        }
+        return Promise.resolve(undefined);
+      })
+      .values();
+    return Promise.allSettled(actions);
+  }
+
+  /**
+   * Get the datas from the state store
+   * @param data The data for getBulk operation
+   * @param db The state store to getBulk the data
+   * @returns The promise of the getBulk action being executed.
+   */
+  #getBulk(data: object, db?: string) {
+    if (!this.context.states) {
+      return Promise.resolve([]);
+    }
+    const states = this.context.states;
+    const actions = Object.keys(states)
+      .filter(v => !db || v === db)
+      .map((storeName: string) => {
+        const component: ComponentSpec = states[storeName];
+        if (ContextUtils.IsStateComponent(component)) {
+          const [keys, parallelism, metadata] = Object.values(data) as [
+            string[],
+            number,
+            string
+          ];
+          return this.daprClient.state.getBulk(
+            storeName,
+            keys,
+            parallelism,
+            metadata
+          );
+        }
+        return Promise.resolve(undefined);
+      })
+      .values();
+    return Promise.allSettled(actions);
+  }
+
+  /**
+   * Delete the data from the state store
+   * @param data The data for delete operation
+   * @param db The state store to delete the data
+   * @returns The promise of the delete action being executed.
+   */
+  #delete(data: object, db?: string): Promise<object> {
+    if (!this.context.states) {
+      return Promise.resolve([]);
+    }
+
+    // check the data whether legal
+    const data_length = Object.values(data).length;
+    if (data_length > 1 || data_length <= 0) {
+      throw new Error('State get method: invalid keys number');
+    }
+
+    const states = this.context.states;
+    const actions = Object.keys(states)
+      .filter(v => !db || v === db)
+      .map((storeName: string) => {
+        const component: ComponentSpec = states[storeName];
+        if (ContextUtils.IsStateComponent(component)) {
+          return this.daprClient.state.delete(
+            storeName,
+            Object.values(data)[0] as string
+          );
+        }
+        return Promise.resolve(undefined);
+      })
+      .values();
+    return Promise.allSettled(actions);
+  }
+
+  /**
+   * Transaction the data from the state store
+   * @param data The data for transaction operation
+   * @param db The state store to transaction the data
+   * @returns The promise of the transaction action being executed.
+   * Note that this depends on the state store component that supports multi-item transactions.
+   * List of state stores that support transactions:
+   * More information: https://docs.dapr.io/reference/components-reference/supported-state-stores/
+   */
+  #transaction(data: object, db?: string): Promise<object> {
+    if (!this.context.states) {
+      return Promise.resolve([]);
+    }
+    const states = this.context.states;
+    const actions = Object.keys(states)
+      .filter(v => !db || v === db)
+      .map((storeName: string) => {
+        const component: ComponentSpec = states[storeName];
+        if (ContextUtils.IsStateComponent(component)) {
+          const [operations, metadata] = Object.values(data) as [
+            OperationType[],
+            IRequestMetadata
+          ];
+          return this.daprClient.state.transaction(
+            storeName,
+            operations as OperationType[],
+            metadata ? (metadata as IRequestMetadata) : null
+          );
+        }
+        return Promise.resolve(undefined);
+      })
+      .values();
+    return Promise.allSettled(actions);
+  }
+
+  /**
+   * query the data from the state store
+   * @param data The data for query operation
+   * @param db The state store to query the data
+   * @returns The promise of the query action being executed.
+   */
+  #query(data: object, db?: string): Promise<object> {
+    if (!this.context.states) {
+      return Promise.resolve([]);
+    }
+    const states = this.context.states;
+    const actions = Object.keys(states)
+      .filter(v => !db || v === db)
+      .map((storeName: string) => {
+        const component: ComponentSpec = states[storeName];
+        if (ContextUtils.IsStateComponent(component)) {
+          return this.daprClient.state.query(
+            storeName,
+            Object.values(data)[0] as StateQueryType
+          );
+        }
+        return Promise.resolve(undefined);
+      })
+      .values();
+    return Promise.allSettled(actions);
+  }
+
+  /**
+   * Use getter to add a layer of objects
+   */
+  get state(): {
+    save: (data: object, db?: string) => Promise<object>;
+    get: (data: object, db?: string) => Promise<object>;
+    getBulk: (data: object, db?: string) => Promise<object>;
+    delete: (data: object, db?: string) => Promise<object>;
+    transaction: (data: object, db?: string) => Promise<object>;
+    query: (data: object, db?: string) => Promise<object>;
+  } {
+    return {
+      save: this.#save.bind(this),
+      get: this.#get.bind(this),
+      getBulk: this.#getBulk.bind(this),
+      delete: this.#delete.bind(this),
+      transaction: this.#transaction.bind(this),
+      query: this.#query.bind(this),
+    };
   }
 }
