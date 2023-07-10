@@ -9,10 +9,12 @@
 
 import { CloudEventV1 as CloudEvent } from 'cloudevents';
 import { IndexedFieldWithPossiblyUndefined } from 'lodash';
+import { KeyValueType } from '@dapr/dapr/types/KeyValue.type';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { Request as Request_3 } from 'express';
 import { Response as Response_2 } from 'express';
+import { StateQueryResponseType } from '@dapr/dapr/types/state/StateQueryResponse.type';
 
 export { CloudEvent }
 
@@ -42,13 +44,6 @@ export interface CloudFunctionsContext {
 }
 
 // @public
-export interface ComponentSpec {
-    metadata?: Record<string, string>;
-    type: `${ComponentType}.${string}`;
-    version: string;
-}
-
-// @public
 export enum ComponentType {
     Binding = "bindings",
     PubSub = "pubsub",
@@ -64,7 +59,7 @@ export class ContextUtils {
     static IsBindingComponent(component: OpenFunctionComponent): boolean;
     static IsKnativeRuntime(context: OpenFunctionContext): boolean;
     static IsPubSubComponent(component: OpenFunctionComponent): boolean;
-    static IsStateComponent(component: ComponentSpec): boolean;
+    static IsStateComponent(component: OpenFunctionComponent): boolean;
 }
 
 // @public
@@ -145,7 +140,7 @@ export interface OpenFunctionContext {
     postPlugins?: string[];
     prePlugins?: string[];
     runtime: `${RuntimeType}` | `${Capitalize<RuntimeType>}` | `${Uppercase<RuntimeType>}`;
-    states?: Record<string, ComponentSpec>;
+    states?: Record<string, OpenFunctionComponent>;
     version: string;
 }
 
@@ -167,12 +162,12 @@ export abstract class OpenFunctionRuntime {
         GRPC: string;
     };
     abstract get state(): {
-        save: (data: object, db?: string) => Promise<object>;
-        get: (data: object, db?: string) => Promise<object>;
-        getBulk: (data: object, db?: string) => Promise<object>;
-        delete: (data: object, db?: string) => Promise<object>;
-        transaction: (data: object, db?: string) => Promise<object>;
-        query: (query: object, db?: string) => Promise<object>;
+        save: (data: object, db?: string) => Promise<void>;
+        get: (data: object, db?: string) => Promise<KeyValueType | string>;
+        getBulk: (data: object, db?: string) => Promise<KeyValueType[]>;
+        delete: (data: object, db?: string) => Promise<void>;
+        transaction: (data: object, db?: string) => Promise<void>;
+        query: (query: object, db?: string) => Promise<StateQueryResponseType>;
     };
     // Warning: (ae-forgotten-export) The symbol "OpenFunctionTrigger" needs to be exported by the entry point index.d.ts
     protected trigger?: OpenFunctionTrigger;
