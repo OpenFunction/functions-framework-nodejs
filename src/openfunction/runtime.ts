@@ -5,9 +5,11 @@ import {Request, Response} from 'express';
 
 import {DaprClient, CommunicationProtocolEnum} from '@dapr/dapr';
 import {KeyValuePairType} from '@dapr/dapr/types/KeyValuePair.type';
+import {KeyValueType} from '@dapr/dapr/types/KeyValue.type';
 import {OperationType} from '@dapr/dapr/types/Operation.type';
 import {IRequestMetadata} from '@dapr/dapr/types/RequestMetadata.type';
 import {StateQueryType} from '@dapr/dapr/types/state/StateQuery.type';
+import {StateQueryResponseType} from '@dapr/dapr/types/state/StateQueryResponse.type';
 
 import {OpenFunction} from '../functions';
 
@@ -15,7 +17,6 @@ import {
   OpenFunctionComponent,
   OpenFunctionContext,
   ContextUtils,
-  ComponentSpec,
 } from './context';
 
 import {Plugin, PluginStore} from './plugin';
@@ -192,15 +193,15 @@ export abstract class OpenFunctionRuntime {
   abstract send(data: object, output?: string): Promise<object>;
 
   /**
-   * The state store and its operations
+   * The promise that handle data by state store.
    */
   abstract get state(): {
-    save: (data: object, db?: string) => Promise<object>;
-    get: (data: object, db?: string) => Promise<object>;
-    getBulk: (data: object, db?: string) => Promise<object>;
-    delete: (data: object, db?: string) => Promise<object>;
-    transaction: (data: object, db?: string) => Promise<object>;
-    query: (query: object, db?: string) => Promise<object>;
+    save: (data: object, db?: string) => Promise<void>;
+    get: (data: object, db?: string) => Promise<KeyValueType | string>;
+    getBulk: (data: object, db?: string) => Promise<KeyValueType[]>;
+    delete: (data: object, db?: string) => Promise<void>;
+    transaction: (data: object, db?: string) => Promise<void>;
+    query: (query: object, db?: string) => Promise<StateQueryResponseType>;
   };
 }
 
@@ -263,30 +264,42 @@ class DaprRuntime extends OpenFunctionRuntime {
   }
 
   /**
+   * Get the state store
+   * @param db the user specify the state store
+   * @returns Corresponding state store
+   */
+  getState(db?: string): OpenFunctionComponent {
+    // check the states field
+    if (!this.context.states) {
+      throw new Error('You must specify the state in the context');
+    }
+
+    // if you don't specify the db, we will use the first one defined in the context
+    if (!db) {
+      if (!ContextUtils.IsStateComponent(this.context.states![0])) {
+        throw new Error('The state component type is wrong');
+      }
+      return Object.values(this.context.states!)[0];
+    }
+
+    // or we will use the one specified by user
+    if (!ContextUtils.IsStateComponent(this.context.states![db])) {
+      throw new Error('The state component type is wrong');
+    }
+    return this.context.states[db];
+  }
+
+  /**
    * Save the data to the state store
    * @param data The data for save operation
    * @param db The state store to save the data
    * @returns The promise of the save action being executed.
    */
-  #save(data: object, db?: string): Promise<object> {
-    if (!this.context.states) {
-      return Promise.resolve([]);
-    }
-    const states = this.context.states;
-    const actions = Object.keys(states)
-      .filter(v => !db || v === db)
-      .map((storeName: string) => {
-        const component: ComponentSpec = states[storeName];
-        if (ContextUtils.IsStateComponent(component)) {
-          return this.daprClient.state.save(
-            storeName,
-            data as KeyValuePairType[]
-          );
-        }
-        return Promise.resolve(undefined);
-      })
-      .values();
-    return Promise.allSettled(actions);
+  #stateSave(data: object, db?: string): Promise<void> {
+    return this.daprClient.state.save(
+      this.getState(db).componentName,
+      data as KeyValuePairType[]
+    );
   }
 
   /**
@@ -295,32 +308,16 @@ class DaprRuntime extends OpenFunctionRuntime {
    * @param db The state store to get the data
    * @returns The promise of the get action being executed.
    */
-  #get(data: object, db?: string): Promise<object> {
-    if (!this.context.states) {
-      return Promise.resolve([]);
-    }
-
-    // check the data whether legal
+  #stateGet(data: object, db?: string): Promise<KeyValueType | string> {
     const data_length = Object.values(data).length;
     if (data_length > 1 || data_length <= 0) {
-      throw new Error('State get method: invalid keys number');
+      throw new Error('State get method: invalid key number');
     }
 
-    const states = this.context.states;
-    const actions = Object.keys(states)
-      .filter(v => !db || v === db)
-      .map((storeName: string) => {
-        const component: ComponentSpec = states[storeName];
-        if (ContextUtils.IsStateComponent(component)) {
-          return this.daprClient.state.get(
-            storeName,
-            Object.values(data)[0] as string
-          );
-        }
-        return Promise.resolve(undefined);
-      })
-      .values();
-    return Promise.allSettled(actions);
+    return this.daprClient.state.get(
+      this.getState(db).componentName,
+      Object.values(data)[0] as string
+    );
   }
 
   /**
@@ -329,32 +326,18 @@ class DaprRuntime extends OpenFunctionRuntime {
    * @param db The state store to getBulk the data
    * @returns The promise of the getBulk action being executed.
    */
-  #getBulk(data: object, db?: string) {
-    if (!this.context.states) {
-      return Promise.resolve([]);
-    }
-    const states = this.context.states;
-    const actions = Object.keys(states)
-      .filter(v => !db || v === db)
-      .map((storeName: string) => {
-        const component: ComponentSpec = states[storeName];
-        if (ContextUtils.IsStateComponent(component)) {
-          const [keys, parallelism, metadata] = Object.values(data) as [
-            string[],
-            number,
-            string
-          ];
-          return this.daprClient.state.getBulk(
-            storeName,
-            keys,
-            parallelism,
-            metadata
-          );
-        }
-        return Promise.resolve(undefined);
-      })
-      .values();
-    return Promise.allSettled(actions);
+  #stateGetBulk(data: object, db?: string): Promise<KeyValueType[]> {
+    const [keys, parallelism, metadata] = Object.values(data) as [
+      string[],
+      number,
+      string
+    ];
+    return this.daprClient.state.getBulk(
+      this.getState(db).componentName,
+      keys,
+      parallelism,
+      metadata
+    );
   }
 
   /**
@@ -363,32 +346,16 @@ class DaprRuntime extends OpenFunctionRuntime {
    * @param db The state store to delete the data
    * @returns The promise of the delete action being executed.
    */
-  #delete(data: object, db?: string): Promise<object> {
-    if (!this.context.states) {
-      return Promise.resolve([]);
-    }
-
-    // check the data whether legal
+  #stateDelete(data: object, db?: string) {
     const data_length = Object.values(data).length;
     if (data_length > 1 || data_length <= 0) {
       throw new Error('State get method: invalid keys number');
     }
 
-    const states = this.context.states;
-    const actions = Object.keys(states)
-      .filter(v => !db || v === db)
-      .map((storeName: string) => {
-        const component: ComponentSpec = states[storeName];
-        if (ContextUtils.IsStateComponent(component)) {
-          return this.daprClient.state.delete(
-            storeName,
-            Object.values(data)[0] as string
-          );
-        }
-        return Promise.resolve(undefined);
-      })
-      .values();
-    return Promise.allSettled(actions);
+    return this.daprClient.state.delete(
+      this.getState(db).componentName,
+      Object.values(data)[0] as string
+    );
   }
 
   /**
@@ -396,34 +363,17 @@ class DaprRuntime extends OpenFunctionRuntime {
    * @param data The data for transaction operation
    * @param db The state store to transaction the data
    * @returns The promise of the transaction action being executed.
-   * Note that this depends on the state store component that supports multi-item transactions.
-   * List of state stores that support transactions:
-   * More information: https://docs.dapr.io/reference/components-reference/supported-state-stores/
    */
-  #transaction(data: object, db?: string): Promise<object> {
-    if (!this.context.states) {
-      return Promise.resolve([]);
-    }
-    const states = this.context.states;
-    const actions = Object.keys(states)
-      .filter(v => !db || v === db)
-      .map((storeName: string) => {
-        const component: ComponentSpec = states[storeName];
-        if (ContextUtils.IsStateComponent(component)) {
-          const [operations, metadata] = Object.values(data) as [
-            OperationType[],
-            IRequestMetadata
-          ];
-          return this.daprClient.state.transaction(
-            storeName,
-            operations as OperationType[],
-            metadata ? (metadata as IRequestMetadata) : null
-          );
-        }
-        return Promise.resolve(undefined);
-      })
-      .values();
-    return Promise.allSettled(actions);
+  #stateTransaction(data: object, db?: string): Promise<void> {
+    const [operations, metadata] = Object.values(data) as [
+      OperationType[],
+      IRequestMetadata
+    ];
+    return this.daprClient.state.transaction(
+      this.getState(db).componentName,
+      operations as OperationType[],
+      metadata ? (metadata as IRequestMetadata) : null
+    );
   }
 
   /**
@@ -432,45 +382,31 @@ class DaprRuntime extends OpenFunctionRuntime {
    * @param db The state store to query the data
    * @returns The promise of the query action being executed.
    */
-  #query(data: object, db?: string): Promise<object> {
-    if (!this.context.states) {
-      return Promise.resolve([]);
-    }
-    const states = this.context.states;
-    const actions = Object.keys(states)
-      .filter(v => !db || v === db)
-      .map((storeName: string) => {
-        const component: ComponentSpec = states[storeName];
-        if (ContextUtils.IsStateComponent(component)) {
-          return this.daprClient.state.query(
-            storeName,
-            Object.values(data)[0] as StateQueryType
-          );
-        }
-        return Promise.resolve(undefined);
-      })
-      .values();
-    return Promise.allSettled(actions);
+  #stateQuery(data: object, db?: string): Promise<StateQueryResponseType> {
+    return this.daprClient.state.query(
+      this.getState(db).componentName,
+      Object.values(data)[0] as StateQueryType
+    );
   }
 
   /**
-   * Use getter to add a layer of objects
+   * The promise that handle data by state store.
    */
   get state(): {
-    save: (data: object, db?: string) => Promise<object>;
-    get: (data: object, db?: string) => Promise<object>;
-    getBulk: (data: object, db?: string) => Promise<object>;
-    delete: (data: object, db?: string) => Promise<object>;
-    transaction: (data: object, db?: string) => Promise<object>;
-    query: (data: object, db?: string) => Promise<object>;
+    save: (data: object, db?: string) => Promise<void>;
+    get: (data: object, db?: string) => Promise<KeyValueType | string>;
+    getBulk: (data: object, db?: string) => Promise<KeyValueType[]>;
+    delete: (data: object, db?: string) => Promise<void>;
+    transaction: (data: object, db?: string) => Promise<void>;
+    query: (query: object, db?: string) => Promise<StateQueryResponseType>;
   } {
     return {
-      save: this.#save.bind(this),
-      get: this.#get.bind(this),
-      getBulk: this.#getBulk.bind(this),
-      delete: this.#delete.bind(this),
-      transaction: this.#transaction.bind(this),
-      query: this.#query.bind(this),
+      save: this.#stateSave.bind(this),
+      get: this.#stateGet.bind(this),
+      getBulk: this.#stateGetBulk.bind(this),
+      delete: this.#stateDelete.bind(this),
+      transaction: this.#stateTransaction.bind(this),
+      query: this.#stateQuery.bind(this),
     };
   }
 }

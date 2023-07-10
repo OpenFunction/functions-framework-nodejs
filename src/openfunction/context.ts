@@ -31,6 +31,10 @@ export interface OpenFunctionContext {
    */
   outputs?: Record<string, OpenFunctionComponent>;
   /**
+   * Optional state store config;
+   */
+  states?: Record<string, OpenFunctionComponent>;
+  /**
    * Optional plugins to be executed before user function.
    */
   prePlugins?: string[];
@@ -42,10 +46,6 @@ export interface OpenFunctionContext {
    * Optional trace plugin config.
    */
   pluginsTracing?: TraceConfig;
-  /**
-   * Optional state store config;
-   */
-  states?: Record<string, ComponentSpec>;
 }
 
 /**
@@ -152,8 +152,8 @@ export class ContextUtils {
    * @param component - The component to check.
    * @returns A boolean value.
    */
-  static IsStateComponent(component: ComponentSpec): boolean {
-    return component?.type.split('.')[0] === ComponentType.State;
+  static IsStateComponent(component: OpenFunctionComponent): boolean {
+    return component?.componentType.split('.')[0] === ComponentType.State;
   }
 }
 
@@ -211,23 +211,4 @@ export enum TraceProviderType {
    * The OpenTelemetry type.
    */
   OpenTelemetry = 'opentelemetry',
-}
-
-/**
- * The specification of the component
- * @public
- */
-export interface ComponentSpec {
-  /**
-   * The name of the state store.
-   */
-  type: `${ComponentType}.${string}`;
-  /**
-   * The version of the component
-   */
-  version: string;
-  /**
-   * Optional metadata as hash map for the component.
-   */
-  metadata?: Record<string, string>;
 }

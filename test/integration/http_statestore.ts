@@ -11,11 +11,9 @@ import {getServer} from '../../src/server';
 import {KeyValueType} from '@dapr/dapr/types/KeyValue.type';
 
 import {Context, StateStore} from '../data/mock';
-import {StateStoreBase} from '../data/mock/context';
 
 const TEST_CONTEXT = {
   ...Context.KnativeBase,
-  states: StateStoreBase,
 };
 
 const TEST_STATESTORE_SAVE = StateStore.Plain.Save;
@@ -37,8 +35,8 @@ describe('OpenFunction - HTTP StateStore', () => {
 
     // Try to start up redis docker container
     shell.exec(
-      // 'docker run --name redis --rm -d -p 6379:6379 redis:latest',
-      'docker run --name redis --rm -d -p 6379:6379 redis/redis-stack-server:latest',
+      // 'docker run --name myredis --rm -d -p 6379:6379 redis:latest',
+      'docker run --name myredis --rm -d -p 6379:6379 redis/redis-stack-server:latest',
       {
         silent: true,
       }
@@ -53,7 +51,7 @@ describe('OpenFunction - HTTP StateStore', () => {
 
   after(() => {
     // Stop redis container
-    shell.exec('docker stop redis', {silent: true});
+    shell.exec('docker stop myredis', {silent: true});
     // Stop dapr sidecar process
     shell.exec(`dapr stop ${APPID}`, {silent: true});
   });
@@ -125,7 +123,7 @@ describe('OpenFunction - HTTP StateStore', () => {
               await ctx.state
                 .save(data, 'redis')
                 .then(res => {
-                  deepStrictEqual(Object.values(res)[0].value, test.expect);
+                  deepStrictEqual(res, test.expect);
                 })
                 .catch(err => {
                   console.log(err);
@@ -135,7 +133,7 @@ describe('OpenFunction - HTTP StateStore', () => {
               await ctx.state
                 .get(data, 'redis')
                 .then(res => {
-                  deepStrictEqual(Object.values(res)[0].value, test.expect);
+                  deepStrictEqual(res, test.expect);
                 })
                 .catch(err => {
                   console.log(err);
@@ -145,9 +143,7 @@ describe('OpenFunction - HTTP StateStore', () => {
               await ctx.state
                 .getBulk(data, 'redis')
                 .then(res => {
-                  const promise_data = Object.values(res)[0]
-                    .value as Array<KeyValueType>;
-                  const promise_data_remove_etag = promise_data.map(obj => {
+                  const promise_data_remove_etag = res.map(obj => {
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const {etag, ...rest} = obj;
                     return rest;
@@ -162,7 +158,7 @@ describe('OpenFunction - HTTP StateStore', () => {
               await ctx.state
                 .delete(data, 'redis')
                 .then(res => {
-                  deepStrictEqual(Object.values(res)[0].value, test.expect);
+                  deepStrictEqual(res, test.expect);
                 })
                 .catch(err => {
                   console.log(err);
@@ -172,7 +168,7 @@ describe('OpenFunction - HTTP StateStore', () => {
               await ctx.state
                 .transaction(data, 'redis')
                 .then(res => {
-                  deepStrictEqual(Object.values(res)[0].value, test.expect);
+                  deepStrictEqual(res, test.expect);
                 })
                 .catch(err => {
                   console.log(err);

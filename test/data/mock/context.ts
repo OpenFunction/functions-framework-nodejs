@@ -1,7 +1,6 @@
 import {
   OpenFunctionContext,
   TraceConfig,
-  ComponentSpec,
 } from '../../../src/openfunction/context';
 
 export const KnativeBase: OpenFunctionContext = {
@@ -22,6 +21,19 @@ export const KnativeBase: OpenFunctionContext = {
       metadata: {
         fileName: 'my-file2.txt',
       },
+    },
+  },
+  states: {
+    // there is a policy, if you don't specify the state component, we will use the first one
+    // or you need specify the state name, then the context will use the one you specify
+    // hint : specify the name is the record key, not the component name
+    redis: {
+      componentName: 'myredis',
+      componentType: 'state.redis',
+    },
+    mysql: {
+      componentName: 'mymysql',
+      componentType: 'state.mysql',
     },
   },
 };
@@ -86,29 +98,4 @@ export const TracerPluginBase: TraceConfig = {
     key: 'key1',
     value: 'value1',
   },
-};
-
-export const StateStoreBase: Record<string, ComponentSpec> = {
-  redis: {
-    type: 'state.redis',
-    version: 'v1',
-    metadata: {
-      redisHost: 'localhost:6379',
-      redisPassword: '',
-    },
-  },
-  // mysql: {
-  //   type: 'state.mysql',
-  //   version: 'v1',
-  //   metadata: {
-  //     connectionString: '<CONNECTION STRING>',
-  //     schemaName: '<SCHEMA NAME>',
-  //     tableName: '<TABLE NAME>',
-  //     timeoutInSeconds: '30',
-  //     // Required if pemContents not provided. Path to pem file.
-  //     pemPath: '<PEM PATH>',
-  //     // Required if pemPath not provided. Pem value
-  //     pemContents: '<PEM CONTENTS>',
-  //   },
-  // },
 };
