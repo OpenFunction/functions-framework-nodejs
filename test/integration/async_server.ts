@@ -5,7 +5,7 @@ import {fill, get, isEmpty} from 'lodash';
 import * as shell from 'shelljs';
 import * as MQTT from 'aedes';
 
-import {getAysncServer} from '../../src/openfunction/async_server';
+import getAysncServer from '../../src/openfunction/async_server';
 import {getFunctionPlugins} from '../../src/loader';
 
 import {Context, Payload} from '../data/mock';
