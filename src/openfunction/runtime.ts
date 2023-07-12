@@ -291,9 +291,6 @@ class DaprRuntime extends OpenFunctionRuntime {
 
     // if you don't specify the db, we will use the first one defined in the context
     if (isEmpty(db)) {
-      console.log(
-        ContextUtils.IsStateComponent(values(this.context.states!)[0])
-      );
       if (!ContextUtils.IsStateComponent(values(this.context.states!)[0])) {
         throw new Error('The state component type is wrong');
       }
