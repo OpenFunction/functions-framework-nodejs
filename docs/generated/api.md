@@ -161,14 +161,8 @@ export abstract class OpenFunctionRuntime {
         HTTP: string;
         GRPC: string;
     };
-    abstract get state(): {
-        save: (data: object, db?: string) => Promise<void>;
-        get: (data: object, db?: string) => Promise<KeyValueType | string>;
-        getBulk: (data: object, db?: string) => Promise<KeyValueType[]>;
-        delete: (data: object, db?: string) => Promise<void>;
-        transaction: (data: object, db?: string) => Promise<void>;
-        query: (query: object, db?: string) => Promise<StateQueryResponseType>;
-    };
+    // Warning: (ae-forgotten-export) The symbol "StateOperations" needs to be exported by the entry point index.d.ts
+    abstract get state(): StateOperations;
     // Warning: (ae-forgotten-export) The symbol "OpenFunctionTrigger" needs to be exported by the entry point index.d.ts
     protected trigger?: OpenFunctionTrigger;
     static WrapUserFunction(userFunction: OpenFunction, context: OpenFunctionContext | OpenFunctionRuntime): (data: any) => Promise<void>;

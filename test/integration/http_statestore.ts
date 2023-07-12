@@ -3,25 +3,28 @@ import {deepStrictEqual} from 'assert';
 import * as sinon from 'sinon';
 import * as supertest from 'supertest';
 import * as shell from 'shelljs';
-import {cloneDeep} from 'lodash';
+import {cloneDeep, map, omit} from 'lodash';
 
 import {OpenFunctionRuntime} from '../../src/functions';
 import {FUNCTION_STATUS_HEADER_FIELD} from '../../src/types';
 import {getServer} from '../../src/server';
-import {KeyValueType} from '@dapr/dapr/types/KeyValue.type';
+import {StateOperations} from '../../src/openfunction/runtime';
 
-import {Context, StateStore} from '../data/mock';
+import {Context, Payload} from '../data/mock';
+import {KeyValueType} from '@dapr/dapr/types/KeyValue.type';
 
 const TEST_CONTEXT = {
   ...Context.KnativeBase,
 };
 
-const TEST_STATESTORE_SAVE = StateStore.Plain.Save;
-const TEST_STATESTORE_GET = StateStore.Plain.Get;
-const TEST_STATESTORE_BULK = StateStore.Plain.GetBulk;
-const TEST_STATESTORE_DELETE = StateStore.Plain.Delete;
-const TEST_STATESTORE_TRANSACTION = StateStore.Plain.Transaction;
-const TEST_STATESTORE_QUERY = StateStore.Plain.Query;
+const TEST_STATESTORE_SAVE = Payload.Plain.State!.Save;
+const TEST_STATESTORE_GET = Payload.Plain.State!.Get;
+const TEST_STATESTORE_BULK = Payload.Plain.State!.GetBulk;
+const TEST_STATESTORE_DELETE = Payload.Plain.State!.Delete;
+const TEST_STATESTORE_TRANSACTION = Payload.Plain.State!.Transaction;
+const TEST_STATESTORE_QUERY = Payload.Plain.State!.Query;
+
+type StateOperation = keyof StateOperations;
 
 describe('OpenFunction - HTTP StateStore', () => {
   const APPID = 'http_statestore';
@@ -35,7 +38,6 @@ describe('OpenFunction - HTTP StateStore', () => {
 
     // Try to start up redis docker container
     shell.exec(
-      // 'docker run --name myredis --rm -d -p 6379:6379 redis:latest',
       'docker run --name myredis --rm -d -p 6379:6379 redis/redis-stack-server:latest',
       {
         silent: true,
@@ -75,20 +77,41 @@ describe('OpenFunction - HTTP StateStore', () => {
       name: 'Get data',
       operation: 'get',
       tosend: TEST_STATESTORE_GET,
-      expect: 'DeathStar',
+      expect: {
+        city: 'Seattle',
+        person: {
+          id: 1036,
+          org: 'Dev Ops',
+        },
+        state: 'WA',
+      },
     },
     {
       name: 'GetBulk data',
-      operation: 'getbulk',
+      operation: 'getBulk',
       tosend: TEST_STATESTORE_BULK,
       expect: [
         {
-          key: 'weapon',
-          data: 'DeathStar',
+          data: {
+            city: 'Seattle',
+            person: {
+              id: 1036,
+              org: 'Dev Ops',
+            },
+            state: 'WA',
+          },
+          key: '1',
         },
         {
-          key: 'planet',
-          data: {name: 'Tatooine'},
+          data: {
+            city: 'Portland',
+            person: {
+              id: 1028,
+              org: 'Hardware',
+            },
+            state: 'OR',
+          },
+          key: '2',
         },
       ],
     },
@@ -111,6 +134,7 @@ describe('OpenFunction - HTTP StateStore', () => {
       // expect: undefined,
     },
   ];
+
   for (const test of testData) {
     it(test.name, async () => {
       const context = cloneDeep(TEST_CONTEXT);
@@ -118,76 +142,21 @@ describe('OpenFunction - HTTP StateStore', () => {
       const server = getServer(
         async (ctx: OpenFunctionRuntime, data: {}) => {
           if (!test.operation) throw new Error('I crashed');
-          switch (test.operation) {
-            case 'save':
-              await ctx.state
-                .save(data, 'redis')
-                .then(res => {
-                  deepStrictEqual(res, test.expect);
-                })
-                .catch(err => {
-                  console.log(err);
-                });
-              break;
-            case 'get':
-              await ctx.state
-                .get(data, 'redis')
-                .then(res => {
-                  deepStrictEqual(res, test.expect);
-                })
-                .catch(err => {
-                  console.log(err);
-                });
-              break;
-            case 'getbulk':
-              await ctx.state
-                .getBulk(data, 'redis')
-                .then(res => {
-                  const promise_data_remove_etag = res.map(obj => {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const {etag, ...rest} = obj;
-                    return rest;
-                  });
-                  deepStrictEqual(promise_data_remove_etag, test.expect);
-                })
-                .catch(err => {
-                  console.log(err);
-                });
-              break;
-            case 'delete':
-              await ctx.state
-                .delete(data, 'redis')
-                .then(res => {
-                  deepStrictEqual(res, test.expect);
-                })
-                .catch(err => {
-                  console.log(err);
-                });
-              break;
-            case 'transaction':
-              await ctx.state
-                .transaction(data, 'redis')
-                .then(res => {
-                  deepStrictEqual(res, test.expect);
-                })
-                .catch(err => {
-                  console.log(err);
-                });
-              break;
-            case 'query':
-              await ctx.state
-                .query(data, 'redis')
-                .then(res => {
-                  console.log(res);
-                  // deepStrictEqual(Object.values(res)[0].value, test.expect);
-                })
-                .catch(err => {
-                  console.log(err);
-                });
-              break;
-            default:
-              throw new Error(`Unknown operation: ${test.operation}`);
-          }
+
+          await ctx.state[test.operation as StateOperation](data)
+            .then(res => {
+              if (test.operation === 'getBulk') {
+                res = map(res as KeyValueType[], obj => omit(obj, 'etag'));
+              }
+              // todo: query still have some problems
+              if (test.operation === 'query') {
+                console.log(res);
+              }
+              deepStrictEqual(res, test.expect);
+            })
+            .catch(err => {
+              console.log(err);
+            });
           // FIXME: This makes server respond right away, even before post hooks
           ctx.res?.send(data);
         },

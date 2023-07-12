@@ -44,9 +44,87 @@ function writeJson(content) {
   fs.writeFileSync(fileName, json);
 }
 
-async function tryKnativeAsync(ctx, data) {
+async function tryKnativeAsyncBindingAndPubSub(ctx, data) {
   debug('✅ Function should receive request: %o', data);
   await ctx.send(data);
+  ctx.res.send(data);
+}
+
+async function tryKnativeAsyncStateSave(ctx, data) {
+  debug('✅ Function should receive request: %o', data);
+  await ctx.state
+    .save(data)
+    .then(res => {
+      debug('✅ Success save: %o', res);
+    })
+    .catch(err => {
+      debug('❌ Failure occurred: %o', err);
+    });
+  ctx.res.send(data);
+}
+
+async function tryKnativeAsyncStateGet(ctx, data) {
+  debug('✅ Function should receive request: %o', data);
+  await ctx.state
+    .get(data)
+    .then(res => {
+      debug('✅ Success save: %o', res);
+    })
+    .catch(err => {
+      debug('❌ Failure occurred: %o', err);
+    });
+  ctx.res.send(data);
+}
+
+async function tryKnativeAsyncStateGetBulk(ctx, data) {
+  debug('✅ Function should receive request: %o', data);
+  await ctx.state
+    .getBulk(data)
+    .then(res => {
+      debug('✅ Success getBulk: %o', res);
+    })
+    .catch(err => {
+      debug('❌ Failure occurred: %o', err);
+    });
+  ctx.res.send(data);
+}
+
+async function tryKnativeAsyncStateDelete(ctx, data) {
+  debug('✅ Function should receive request: %o', data);
+  await ctx.state
+    .delete(data)
+    .then(res => {
+      debug('✅ Success delete: %o', res);
+    })
+    .catch(err => {
+      debug('❌ Failure occurred: %o', err);
+    });
+  ctx.res.send(data);
+}
+
+async function tryKnativeAsyncStateTransaction(ctx, data) {
+  debug('✅ Function should receive request: %o', data);
+  await ctx.state
+    .transaction(data)
+    .then(res => {
+      debug('✅ Success transaction: %o', res);
+    })
+    .catch(err => {
+      debug('❌ Failure occurred: %o', err);
+    });
+  ctx.res.send(data);
+}
+
+async function tryKnativeAsyncStateQuery(ctx, data) {
+  debug('✅ Function should receive request: %o', data);
+  await ctx.state
+    .query(data)
+    .then(res => {
+      debug('✅ Success query: %o', res);
+    })
+    .catch(err => {
+      debug('❌ Failure occurred: %o', err);
+    });
   ctx.res.send(data);
 }
 
@@ -58,6 +136,12 @@ module.exports = {
   writeHttp,
   writeCloudEvent,
   writeLegacyEvent,
-  tryKnativeAsync,
+  tryKnativeAsyncBindingAndPubSub,
+  tryKnativeAsyncStateSave,
+  tryKnativeAsyncStateGet,
+  tryKnativeAsyncStateGetBulk,
+  tryKnativeAsyncStateDelete,
+  tryKnativeAsyncStateTransaction,
+  tryKnativeAsyncStateQuery,
   tryAsync,
 };
