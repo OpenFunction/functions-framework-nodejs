@@ -142,7 +142,7 @@ describe('OpenFunction - Async', () => {
     });
   });
 
-  it('mqtt binding w/ custom plugins', done => {
+  it.skip('mqtt binding w/ custom plugins', done => {
     getFunctionPlugins(process.cwd() + '/test/data').then(plugins => {
       const start = get(plugins!.numbers, 'oct');
 

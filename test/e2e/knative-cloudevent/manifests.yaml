@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knative-cloudevent-deployment
+  labels:
+    app: knative-cloudevent
+    case: knative
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: knative-cloudevent
+      case: knative
+  template:
+    metadata:
+      labels:
+        app: knative-cloudevent
+        case: knative
+    spec:
+      containers:
+        - name: my-knative-cloudevent
+          image: knative-cloudevent:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: knative-cloudevent-service
+spec:
+  type: NodePort
+  selector:
+    app: knative-cloudevent
+  ports:
+    - protocol: TCP
+      port: 12345
+      targetPort: 8080
+      nodePort: 31234

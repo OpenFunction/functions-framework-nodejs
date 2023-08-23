@@ -1,0 +1,57 @@
+name: Node.js E2E CI
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/**"
+      - "docs/**"
+      - "src/**"
+      - "test/**"
+      - "package.json"
+      - "package-lock.json"
+
+jobs:
+  e2e_test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    name: E2E Tests
+    strategy:
+      matrix:
+        case:
+          - name: knative http e2e test
+            e2e: "test/e2e/knative-http/e2e.yaml"
+          - name: knative cloudevent e2e test
+            e2e: "test/e2e/knative-cloudevent/e2e.yaml"
+          - name: knative event e2e test
+            e2e: "test/e2e/knative-event/e2e.yaml"
+          - name: knative openfunction bindings e2e test
+            e2e: "test/e2e/knative-openfunction-bindings/e2e.yaml"
+          - name: knative openfunction pubsub e2e test
+            e2e: "test/e2e/knative-openfunction-pubsub/e2e.yaml"
+          - name: async openfunction bindings e2e test
+            e2e: "test/e2e/async-openfunction-bindings/e2e.yaml"
+          - name: async openfunction pubsub e2e test
+            e2e: "test/e2e/async-openfunction-pubsub/e2e.yaml"
+          - name: knative openfunction state e2e test
+            e2e: "test/e2e/knative-openfunction-state/e2e.yaml"
+          - name: openfunction plugins e2e test
+            e2e: "test/e2e/openfunction-plugins/e2e.yaml"
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install yq
+        env:
+          VERSION: v4.22.1
+          BINARY: yq_linux_amd64
+        run: |
+          wget https://github.com/mikefarah/yq/releases/download/${VERSION}/${BINARY}.tar.gz -O - |\
+          tar xz && mv ${BINARY} /usr/local/bin/yq
+
+      - uses: apache/skywalking-infra-e2e@main
+        with:
+          e2e-file: ${{matrix.case.e2e}}
+
+      - name: Cleanup
+        if: ${{ failure() }}
+        run: e2e cleanup -c ${{matrix.case.e2e}}

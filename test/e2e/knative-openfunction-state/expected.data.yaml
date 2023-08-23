@@ -1,0 +1,9 @@
+results:
+  - key: "1"
+    data:
+      city: Seattle
+      state: WA
+      person:
+        id: "1036"
+        org: Dev Ops
+token: "1"

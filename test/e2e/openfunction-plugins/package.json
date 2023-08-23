@@ -1,0 +1,12 @@
+{
+    "dependencies": {
+        "@openfunction/functions-framework": "file:../../../",
+        "concurrently": "file:../../../node_modules/concurrently",
+        "debug": "file:../../../node_modules/debug",
+        "env-cmd": "file:../../../node_modules/env-cmd",
+        "wait-on": "file:../../../node_modules/wait-on"
+    },
+    "scripts": {
+        "knative:plugin:run:func": "env-cmd -e knative functions-framework --signature-type=openfunction --target=writeSkywalkingLocalBindings"
+    }
+}

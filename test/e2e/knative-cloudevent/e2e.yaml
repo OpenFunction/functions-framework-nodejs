@@ -1,0 +1,48 @@
+setup:
+  env: kind
+  file: ../kind.yaml
+  steps:
+    - name: build and load image
+      command: |
+        docker build -t knative-cloudevent:latest -f test/e2e/knative-cloudevent/Dockerfile.knative.cloudevent .
+        kind load docker-image knative-cloudevent:latest
+
+    - name: setup manifests
+      path: manifests.yaml
+      wait:
+        - namespace: default
+          resource: deployment/knative-cloudevent-deployment
+          for: condition=Available
+        - namespace: default
+          resource: pod
+          for: condition=Ready
+
+#  kind:
+#    expose-ports:
+#      - namespace: default
+#        resource: service/knative
+#        port: 12345
+
+  timeout: 30m
+
+cleanup:
+  # always never success failure
+  on: success
+
+#trigger:
+#  action: "http"
+#  interval: 3s
+#  times: 10
+#  url: http://127.0.0.1:80
+#  method: GET
+
+verify:
+  # verify with retry strategy
+  retry:
+    # max retry count
+    count: 60
+    # the interval between two attempts, e.g. 10s, 1m.
+    interval: 10s
+  cases:
+    - query: bash test/e2e/knative-cloudevent/verify.sh 127.0.0.1 80 | yq eval -P
+      expected: expected.data.yaml

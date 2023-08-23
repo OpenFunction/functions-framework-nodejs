@@ -26,7 +26,7 @@ const TEST_STATESTORE_QUERY = Payload.Plain.State!.Query;
 
 type StateOperation = keyof StateOperations;
 
-describe('OpenFunction - HTTP StateStore', () => {
+describe('OpenFunction - HTTP State', () => {
   const APPID = 'http_statestore';
 
   before(() => {
@@ -36,26 +36,27 @@ describe('OpenFunction - HTTP StateStore', () => {
     if (shell.exec('docker', {silent: true}).code !== 0)
       throw new Error('Please ensure "docker" is installed');
 
-    // Try to start up redis docker container
+    // Try to start up pg docker container
     shell.exec(
-      'docker run --name myredis --rm -d -p 6379:6379 redis/redis-stack-server:latest',
-      {
-        silent: true,
-      }
+      'docker run --name pg -e POSTGRES_PASSWORD=example --rm -d -p 5432:5432  postgres:12',
+      {silent: true}
     );
 
-    // Try to run Dapr sidecar on port 3500 with components for testing
-    shell.exec(
-      `dapr run -H 3500 -G 50001 -d ./test/data/components/state -a ${APPID}`,
-      {silent: true, async: true}
-    );
+    // Delay the execution of Dapr start by 3 seconds
+    setTimeout(() => {
+      // Try to run Dapr sidecar on port 3500 with components for testing
+      shell.exec(
+        `dapr run -H 3500 -G 50001 -d ./test/data/components/state -a ${APPID}`,
+        {silent: true, async: true}
+      );
+    }, 10 * 1000); // Delay of 10 seconds
   });
 
   after(() => {
-    // Stop redis container
-    shell.exec('docker stop myredis', {silent: true});
     // Stop dapr sidecar process
     shell.exec(`dapr stop ${APPID}`, {silent: true});
+    // Stop pg container
+    shell.exec('docker stop pg', {silent: true});
   });
 
   beforeEach(() => {
@@ -93,17 +94,6 @@ describe('OpenFunction - HTTP StateStore', () => {
       expect: [
         {
           data: {
-            city: 'Seattle',
-            person: {
-              id: 1036,
-              org: 'Dev Ops',
-            },
-            state: 'WA',
-          },
-          key: '1',
-        },
-        {
-          data: {
             city: 'Portland',
             person: {
               id: 1028,
@@ -112,6 +102,17 @@ describe('OpenFunction - HTTP StateStore', () => {
             state: 'OR',
           },
           key: '2',
+        },
+        {
+          data: {
+            city: 'Seattle',
+            person: {
+              id: 1036,
+              org: 'Dev Ops',
+            },
+            state: 'WA',
+          },
+          key: '1',
         },
       ],
     },
@@ -131,13 +132,30 @@ describe('OpenFunction - HTTP StateStore', () => {
       name: 'Query data',
       operation: 'query',
       tosend: TEST_STATESTORE_QUERY,
-      // expect: undefined,
+      expect: {
+        results: [
+          {
+            data: {
+              city: 'Seattle',
+              person: {
+                id: 1036,
+                org: 'Dev Ops',
+              },
+              state: 'WA',
+            },
+            etag: '495',
+            key: '1',
+          },
+        ],
+        token: '1',
+      },
     },
   ];
 
   for (const test of testData) {
     it(test.name, async () => {
       const context = cloneDeep(TEST_CONTEXT);
+
       // test the ouput of the state sotre
       const server = getServer(
         async (ctx: OpenFunctionRuntime, data: {}) => {
@@ -147,10 +165,6 @@ describe('OpenFunction - HTTP StateStore', () => {
             .then(res => {
               if (test.operation === 'getBulk') {
                 res = map(res as KeyValueType[], obj => omit(obj, 'etag'));
-              }
-              // todo: query still have some problems
-              if (test.operation === 'query') {
-                console.log(res);
               }
               deepStrictEqual(res, test.expect);
             })

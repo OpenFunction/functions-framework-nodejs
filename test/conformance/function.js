@@ -68,7 +68,7 @@ async function tryKnativeAsyncStateGet(ctx, data) {
   await ctx.state
     .get(data)
     .then(res => {
-      debug('✅ Success save: %o', res);
+      debug('✅ Success get: %o', res);
     })
     .catch(err => {
       debug('❌ Failure occurred: %o', err);

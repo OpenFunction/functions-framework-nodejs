@@ -1,0 +1,18 @@
+FROM node:16.17.0-bullseye-slim
+
+# Set working directory
+WORKDIR /ff
+
+# Copy project files to container
+COPY package.json tsconfig.json /ff/
+COPY src /ff/src
+COPY test /ff/test
+
+# Install dependencies
+RUN npm install
+
+# Set working directory to /ff/test/e2e/knative-openfunction-state/delete
+WORKDIR /ff/test/e2e/knative-openfunction-state/delete
+
+# Run the ts-node command to execute src/main.ts
+CMD ["../../../../node_modules/.bin/env-cmd", "-e", "knative", "../../../../node_modules/.bin/ts-node", "../../../../src/main.ts", "--target=tryKnativeStateDelete","--signature-type=openfunction"]

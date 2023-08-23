@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: async-openfunction-pubsub-publisher-deployment
+  labels:
+    app: async-openfunction-pubsub-publisher
+    case: async
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: async-openfunction-pubsub-publisher
+      case: async
+  template:
+    metadata:
+      labels:
+        app: async-openfunction-pubsub-publisher
+        case: async
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "async-openfunction-pubsub-publisher-app"
+        dapr.io/app-port: "8080"
+        dapr.io/log-as-json: "true"
+        dapr.io/app-protocol: "http"
+    spec:
+      containers:
+        - name: my-async-openfunction-pubsub-publisher
+          image: async-openfunction-pubsub-publisher:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: async-openfunction-pubsub-subscriber-deployment
+  labels:
+    app: async-openfunction-pubsub-subscriber
+    case: async
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: async-openfunction-pubsub-subscriber
+      case: async
+  template:
+    metadata:
+      labels:
+        app: async-openfunction-pubsub-subscriber
+        case: async
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "async-openfunction-pubsub-subscriber-app"
+        dapr.io/app-port: "8080"
+        dapr.io/log-as-json: "true"
+        dapr.io/app-protocol: "http"
+    spec:
+      containers:
+        - name: my-async-openfunction-pubsub-subscriber
+          image: async-openfunction-pubsub-subscriber:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: async-openfunction-pubsub-publisher-component-cron
+spec:
+  type: bindings.cron
+  version: v1
+  metadata:
+    - name: schedule
+      value: "@every 2s"
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: async-openfunction-pubsub-publisher-component-kafka
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+    - name: brokers
+      value: kafka-server-kafka-brokers:9092
+    - name: consumerGroup
+      value: async-openfunction-pubsub-publisher-component-kafka
+    - name: authRequired
+      value: false
+    - name: disableTls
+      value: true
+    - name: authType
+      value: none
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: async-openfunction-pubsub-subscriber-component-kafka
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+    - name: brokers
+      value: kafka-server-kafka-brokers:9092
+    - name: consumerGroup
+      value: async-openfunction-pubsub-subscriber-component-kafka
+    - name: authRequired
+      value: false
+    - name: disableTls
+      value: true
+    - name: authType
+      value: none
+

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knative-http-deployment
+  labels:
+    app: knative-http
+    case: knative
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: knative-http
+      case: knative
+  template:
+    metadata:
+      labels:
+        app: knative-http
+        case: knative
+    spec:
+      containers:
+        - name: my-knative-http
+          image: knative-http:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: knative-http-service
+spec:
+  type: NodePort
+  selector:
+    app: knative-http
+  ports:
+    - protocol: TCP
+      port: 12345
+      targetPort: 8080
+      nodePort: 31234

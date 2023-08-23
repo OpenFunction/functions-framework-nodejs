@@ -111,7 +111,7 @@ Plain.State = {
   Query: {
     query: {
       filter: {
-        EQ: {state: 'CA'},
+        EQ: {state: 'WA'},
       },
       sort: [
         {

@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: async-openfunction-bindings-sender-deployment
+  labels:
+    app: async-openfunction-bindings-sender
+    case: async
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: async-openfunction-bindings-sender
+      case: async
+  template:
+    metadata:
+      labels:
+        app: async-openfunction-bindings-sender
+        case: async
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "async-openfunction-bindings-sender-app"
+        dapr.io/app-port: "8080"
+        dapr.io/log-as-json: "true"
+        dapr.io/app-protocol: "http"
+    spec:
+      containers:
+        - name: my-async-openfunction-bindings-sender
+          image: async-openfunction-bindings-sender:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: async-openfunction-bindings-target-deployment
+  labels:
+    app: async-openfunction-bindings-target
+    case: async
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: async-openfunction-bindings-target
+      case: async
+  template:
+    metadata:
+      labels:
+        app: async-openfunction-bindings-target
+        case: async
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "async-openfunction-bindings-target-app"
+        dapr.io/app-port: "8080"
+        dapr.io/log-as-json: "true"
+        dapr.io/app-protocol: "http"
+    spec:
+      containers:
+        - name: my-async-openfunction-bindings-target
+          image: async-openfunction-bindings-target:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: async-openfunction-bindings-sender-component-cron
+spec:
+  type: bindings.cron
+  version: v1
+  metadata:
+    - name: schedule
+      value: "@every 2s"
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: async-openfunction-bindings-sender-component-kafka
+spec:
+  type: bindings.kafka
+  version: v1
+  metadata:
+    - name: brokers
+      value: kafka-server-kafka-brokers:9092
+    - name: consumerGroup
+      value: async-openfunction-bindings-sender-component-kafka
+    - name: topics
+      value: bindings-topic
+    - name: publishTopic
+      value: bindings-topic
+    - name: authRequired
+      value: false
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: async-openfunction-bindings-target-component-kafka
+spec:
+  type: bindings.kafka
+  version: v1
+  metadata:
+    - name: brokers
+      value: kafka-server-kafka-brokers:9092
+    - name: consumerGroup
+      value: async-openfunction-bindings-target-component-kafka
+    - name: topics
+      value: bindings-topic
+    - name: publishTopic
+      value: bindings-topic
+    - name: authRequired
+      value: false
+

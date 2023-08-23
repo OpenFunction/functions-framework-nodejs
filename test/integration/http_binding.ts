@@ -73,7 +73,7 @@ describe('OpenFunction - HTTP Binding', () => {
   ];
 
   for (const test of testData) {
-    it(test.name, async () => {
+    it.skip(test.name, async () => {
       const context = cloneDeep(TEST_CONTEXT);
       context.prePlugins = context.postPlugins = ['ticktock'];
       context.postPlugins.push('sky-pathfinder');

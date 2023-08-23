@@ -1,0 +1,60 @@
+setup:
+  env: kind
+  file: ../kind.yaml
+  steps:
+    - name: install dapr
+      command: |
+        dapr -v || (wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash)
+        dapr init -k -n dapr-system --runtime-version 1.11.0 --log-as-json --wait --timeout 600
+      wait:
+        - namespace: dapr-system
+          resource: pod
+          label-selector: app.kubernetes.io/name=dapr
+          for: condition=Ready
+
+    - name: install helm
+      command: |
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+    - name: install kafka operator
+      command: |
+        helm repo add strimzi https://strimzi.io/charts/
+        helm install kafka-operator -n default strimzi/strimzi-kafka-operator --version 0.35.0
+
+    - name: install kafka
+      path: ../kafka.yaml
+
+    - name: build and load image
+      command: |
+        docker build -t knative-openfunction-bindings:latest -f test/e2e/knative-openfunction-bindings/Dockerfile.knative.bindings .
+        kind load docker-image knative-openfunction-bindings:latest
+
+    - name: setup manifests
+      path: manifests.yaml
+      wait:
+        - namespace: default
+          resource: deployment/knative-openfunction-bindings-deployment
+          for: condition=Available
+        - namespace: default
+          resource: pod
+          for: condition=Ready
+
+  timeout: 30m
+
+cleanup:
+  # always never success failure
+  on: success
+
+trigger:
+  action: ""
+
+verify:
+  # verify with retry strategy
+  retry:
+    # max retry count
+    count: 20
+    # the interval between two attempts, e.g. 10s, 1m.
+    interval: 30s
+  cases:
+    - query: bash test/e2e/knative-openfunction-bindings/verify.sh 127.0.0.1 80 | yq eval -P
+      expected: expected.data.yaml

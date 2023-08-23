@@ -1,8 +1,8 @@
 {
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
-    "toolVersion": "7.33.5",
-    "schemaVersion": 1010,
+    "toolVersion": "7.36.3",
+    "schemaVersion": 1011,
     "oldestForwardsCompatibleVersion": 1001,
     "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
@@ -653,6 +653,7 @@
           ],
           "fileUrlPath": "src/openfunction/context.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "ContextUtils",
           "preserveMemberOrder": false,
           "members": [
@@ -702,6 +703,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "IsAsyncRuntime"
             },
             {
@@ -750,6 +752,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "IsBindingComponent"
             },
             {
@@ -798,6 +801,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "IsKnativeRuntime"
             },
             {
@@ -846,6 +850,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "IsPubSubComponent"
             },
             {
@@ -894,6 +899,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "IsStateComponent"
             }
           ],
@@ -2203,6 +2209,7 @@
           ],
           "fileUrlPath": "src/openfunction/runtime.ts",
           "releaseTag": "Public",
+          "isAbstract": true,
           "name": "OpenFunctionRuntime",
           "preserveMemberOrder": false,
           "members": [
@@ -2267,7 +2274,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": true
+              "isProtected": true,
+              "isAbstract": false
             },
             {
               "kind": "Property",
@@ -2297,7 +2305,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             },
             {
               "kind": "Method",
@@ -2345,6 +2354,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "getPlugin"
             },
             {
@@ -2379,7 +2389,8 @@
                 "endIndex": 3
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             },
             {
               "kind": "Method",
@@ -2428,6 +2439,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "Parse"
             },
             {
@@ -2477,6 +2489,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "ProxyContext"
             },
             {
@@ -2538,7 +2551,8 @@
                 "endIndex": 9
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             },
             {
               "kind": "Property",
@@ -2581,7 +2595,8 @@
                 "endIndex": 5
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             },
             {
               "kind": "Method",
@@ -2649,6 +2664,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": true,
               "name": "send"
             },
             {
@@ -2714,6 +2730,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "setTrigger"
             },
             {
@@ -2743,7 +2760,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             },
             {
               "kind": "Property",
@@ -2773,7 +2791,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": true
             },
             {
               "kind": "Property",
@@ -2803,7 +2822,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": true
+              "isProtected": true,
+              "isAbstract": false
             },
             {
               "kind": "Method",
@@ -2886,6 +2906,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "WrapUserFunction"
             }
           ],
@@ -2903,6 +2924,7 @@
           ],
           "fileUrlPath": "src/openfunction/plugin.ts",
           "releaseTag": "Public",
+          "isAbstract": false,
           "name": "Plugin_2",
           "preserveMemberOrder": false,
           "members": [
@@ -3039,6 +3061,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "execPostHook"
             },
             {
@@ -3126,6 +3149,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "execPreHook"
             },
             {
@@ -3182,6 +3206,7 @@
                 }
               ],
               "isOptional": false,
+              "isAbstract": false,
               "name": "get"
             },
             {
@@ -3211,7 +3236,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             },
             {
               "kind": "Property",
@@ -3240,7 +3266,8 @@
                 "endIndex": 2
               },
               "isStatic": false,
-              "isProtected": false
+              "isProtected": false,
+              "isAbstract": false
             }
           ],
           "implementsTokenRanges": []

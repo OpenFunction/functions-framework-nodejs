@@ -1,0 +1,298 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knative-openfunction-state-save-deployment
+  labels:
+    app: knative-openfunction-state-save
+    case: knative
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: knative-openfunction-state-save
+      case: knative
+  template:
+    metadata:
+      labels:
+        app: knative-openfunction-state-save
+        case: knative
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "knative-openfunction-state-app"
+        dapr.io/app-port: "8080"
+        dapr.io/log-as-json: "true"
+        dapr.io/app-protocol: "http" # GRPC is not well supported so far in Dapr Node.js SDK
+    spec:
+      containers:
+        - name: my-knative-openfunction-state-save
+          image: knative-openfunction-state-save:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knative-openfunction-state-get-deployment
+  labels:
+    app: knative-openfunction-state-get
+    case: knative
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: knative-openfunction-state-get
+      case: knative
+  template:
+    metadata:
+      labels:
+        app: knative-openfunction-state-get
+        case: knative
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "knative-openfunction-state-app"
+        dapr.io/app-port: "8080"
+        dapr.io/log-as-json: "true"
+        dapr.io/app-protocol: "http" # GRPC is not well supported so far in Dapr Node.js SDK
+    spec:
+      containers:
+        - name: my-knative-openfunction-state-get
+          image: knative-openfunction-state-get:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knative-openfunction-state-getbulk-deployment
+  labels:
+    app: knative-openfunction-state-getbulk
+    case: knative
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: knative-openfunction-state-getbulk
+      case: knative
+  template:
+    metadata:
+      labels:
+        app: knative-openfunction-state-getbulk
+        case: knative
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "knative-openfunction-state-app"
+        dapr.io/app-port: "8080"
+        dapr.io/log-as-json: "true"
+        dapr.io/app-protocol: "http" # GRPC is not well supported so far in Dapr Node.js SDK
+    spec:
+      containers:
+        - name: my-knative-openfunction-state-getbulk
+          image: knative-openfunction-state-getbulk:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knative-openfunction-state-delete-deployment
+  labels:
+    app: knative-openfunction-state-delete
+    case: knative
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: knative-openfunction-state-delete
+      case: knative
+  template:
+    metadata:
+      labels:
+        app: knative-openfunction-state-delete
+        case: knative
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "knative-openfunction-state-app"
+        dapr.io/app-port: "8080"
+        dapr.io/log-as-json: "true"
+        dapr.io/app-protocol: "http" # GRPC is not well supported so far in Dapr Node.js SDK
+    spec:
+      containers:
+        - name: my-knative-openfunction-state-delete
+          image: knative-openfunction-state-delete:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knative-openfunction-state-transaction-deployment
+  labels:
+    app: knative-openfunction-state-transaction
+    case: knative
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: knative-openfunction-state-transaction
+      case: knative
+  template:
+    metadata:
+      labels:
+        app: knative-openfunction-state-transaction
+        case: knative
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "knative-openfunction-state-app"
+        dapr.io/app-port: "8080"
+        dapr.io/log-as-json: "true"
+        dapr.io/app-protocol: "http" # GRPC is not well supported so far in Dapr Node.js SDK
+    spec:
+      containers:
+        - name: my-knative-openfunction-state-transaction
+          image: knative-openfunction-state-transaction:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knative-openfunction-state-query-deployment
+  labels:
+    app: knative-openfunction-state-query
+    case: knative
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: knative-openfunction-state-query
+      case: knative
+  template:
+    metadata:
+      labels:
+        app: knative-openfunction-state-query
+        case: knative
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "knative-openfunction-state-app"
+        dapr.io/app-port: "8080"
+        dapr.io/log-as-json: "true"
+        dapr.io/app-protocol: "http" # GRPC is not well supported so far in Dapr Node.js SDK
+    spec:
+      containers:
+        - name: my-knative-openfunction-state-query
+          image: knative-openfunction-state-query:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: knative-openfunction-state-save-service
+spec:
+  type: NodePort
+  selector:
+    app: knative-openfunction-state-save
+  ports:
+    - protocol: TCP
+      port: 12345
+      targetPort: 8080
+      nodePort: 31234
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: knative-openfunction-state-get-service
+spec:
+  type: NodePort
+  selector:
+    app: knative-openfunction-state-get
+  ports:
+    - protocol: TCP
+      port: 12346
+      targetPort: 8080
+      nodePort: 31235
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: knative-openfunction-state-getbulk-service
+spec:
+  type: NodePort
+  selector:
+    app: knative-openfunction-state-getbulk
+  ports:
+    - protocol: TCP
+      port: 12347
+      targetPort: 8080
+      nodePort: 31236
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: knative-openfunction-state-delete-service
+spec:
+  type: NodePort
+  selector:
+    app: knative-openfunction-state-delete
+  ports:
+    - protocol: TCP
+      port: 12348
+      targetPort: 8080
+      nodePort: 31237
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: knative-openfunction-state-transaction-service
+spec:
+  type: NodePort
+  selector:
+    app: knative-openfunction-state-transaction
+  ports:
+    - protocol: TCP
+      port: 12349
+      targetPort: 8080
+      nodePort: 31238
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: knative-openfunction-state-query-service
+spec:
+  type: NodePort
+  selector:
+    app: knative-openfunction-state-query
+  ports:
+    - protocol: TCP
+      port: 12350
+      targetPort: 8080
+      nodePort: 31239
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: knative-openfunction-state-component
+spec:
+  type: state.postgresql
+  version: v1
+  metadata:
+    - name: connectionString
+      value: "host=postgres-postgresql user=postgres password=password port=5432 connect_timeout=10"

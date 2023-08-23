@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knative-openfunction-pubsub-deployment
+  labels:
+    app: knative-openfunction-pubsub
+    case: knative
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: knative-openfunction-pubsub
+      case: knative
+  template:
+    metadata:
+      labels:
+        app: knative-openfunction-pubsub
+        case: knative
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "knative-openfunction-pubsub-app"
+        dapr.io/app-port: "8080"
+        dapr.io/log-as-json: "true"
+        dapr.io/app-protocol: "http" # GRPC is not well supported so far in Dapr Node.js SDK
+    spec:
+      containers:
+        - name: my-knative-openfunction-pubsub
+          image: knative-openfunction-pubsub:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: knative-openfunction-pubsub-component
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+    - name: brokers  # Required.
+      value: kafka-server-kafka-brokers:9092
+    - name: consumerGroup
+      value: knative-openfunction-pubsub
+    - name: authRequired
+      value: "false"
+    - name: disableTls
+      value: "true"
+    - name: authType
+      value: "none"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: knative-openfunction-pubsub-service
+spec:
+  type: NodePort
+  selector:
+    app: knative-openfunction-pubsub
+  ports:
+    - protocol: TCP
+      port: 12345
+      targetPort: 8080
+      nodePort: 31234

@@ -27,9 +27,9 @@ export const KnativeBase: OpenFunctionContext = {
     // there is a policy, if you don't specify the state component, we will use the first one
     // or you need specify the state name, then the context will use the one you specify
     // hint : specify the name is the record key, not the component name
-    redis: {
-      componentName: 'myredis',
-      componentType: 'state.redis',
+    postgreSQL: {
+      componentName: 'mypg',
+      componentType: 'state.postgresql',
     },
     mysql: {
       componentName: 'mymysql',

@@ -1,0 +1,87 @@
+setup:
+  env: kind
+  file: ../kind.yaml
+  steps:
+    - name: install dapr
+      command: |
+        dapr -v || (wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash)
+        dapr init -k -n dapr-system --runtime-version 1.11.0 --log-as-json --wait --timeout 600
+      wait:
+        - namespace: dapr-system
+          resource: pod
+          label-selector: app.kubernetes.io/name=dapr
+          for: condition=Ready
+
+    - name: install helm
+      command: |
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+    - name: install postgres
+      command: |
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm install postgres -n default bitnami/postgresql -f test/e2e/knative-openfunction-state/pg-values.yaml
+      wait:
+        - namespace: default
+          resource: pod
+          for: condition=Ready
+
+    - name: build and load image
+      command: |
+        docker build -t knative-openfunction-state-save:latest -f test/e2e/knative-openfunction-state/save/Dockerfile.knative.state.save .
+        docker build -t knative-openfunction-state-get:latest -f test/e2e/knative-openfunction-state/get/Dockerfile.knative.state.get .
+        docker build -t knative-openfunction-state-getbulk:latest -f test/e2e/knative-openfunction-state/getbulk/Dockerfile.knative.state.getbulk .
+        docker build -t knative-openfunction-state-delete:latest -f test/e2e/knative-openfunction-state/delete/Dockerfile.knative.state.delete .
+        docker build -t knative-openfunction-state-transaction:latest -f test/e2e/knative-openfunction-state/transaction/Dockerfile.knative.state.transaction .
+        docker build -t knative-openfunction-state-query:latest -f test/e2e/knative-openfunction-state/query/Dockerfile.knative.state.query .
+        kind load docker-image knative-openfunction-state-save:latest
+        kind load docker-image knative-openfunction-state-get:latest
+        kind load docker-image knative-openfunction-state-getbulk:latest
+        kind load docker-image knative-openfunction-state-delete:latest
+        kind load docker-image knative-openfunction-state-transaction:latest
+        kind load docker-image knative-openfunction-state-query:latest
+
+    - name: setup manifests
+      path: manifests.yaml
+      wait:
+        - namespace: default
+          resource: deployment/knative-openfunction-state-get-deployment
+          for: condition=Available
+        - namespace: default
+          resource: deployment/knative-openfunction-state-save-deployment
+          for: condition=Available
+        - namespace: default
+          resource: deployment/knative-openfunction-state-getbulk-deployment
+          for: condition=Available
+        - namespace: default
+          resource: deployment/knative-openfunction-state-delete-deployment
+          for: condition=Available
+        - namespace: default
+          resource: deployment/knative-openfunction-state-transaction-deployment
+          for: condition=Available
+        - namespace: default
+          resource: deployment/knative-openfunction-state-query-deployment
+          for: condition=Available
+        - namespace: default
+          resource: pod
+          for: condition=Ready
+
+  timeout: 30m
+
+cleanup:
+  # always never success failure
+  on: success
+
+trigger:
+  action: ""
+
+verify:
+  # verify with retry strategy
+  retry:
+    # max retry count
+    count: 20
+    # the interval between two attempts, e.g. 10s, 1m.
+    interval: 30s
+
+  cases:
+    - query: bash test/e2e/knative-openfunction-state/verify.sh 127.0.0.1 80 81 82 83 84 85 | yq eval -P
+      expected: expected.data.yaml

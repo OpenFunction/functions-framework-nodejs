@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openfunction-skywalking-plugins-deployment
+  labels:
+    app: openfunction-skywalking-plugins
+    case: knative
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openfunction-skywalking-plugins
+      case: knative
+  template:
+    metadata:
+      labels:
+        app: openfunction-skywalking-plugins
+        case: knative
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "openfunction-plugins-app"
+        dapr.io/app-port: "8080"
+        dapr.io/log-as-json: "true"
+        dapr.io/app-protocol: "http" # GRPC is not well supported so far in Dapr Node.js SDK
+    spec:
+      containers:
+        - name: oap
+          image: apache/skywalking-oap-server:9.2.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 11800
+              name: grpc
+              protocol: TCP
+            - containerPort: 12800
+              name: collector
+              protocol: TCP
+        - name: my-openfunction-skywalking-plugins
+          image: openfunction-skywalking-plugins:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: function-port
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openfunction-skywalking-plugins-service
+spec:
+  type: NodePort
+  selector:
+    app: openfunction-skywalking-plugins
+  ports:
+    - protocol: TCP
+      port: 12345
+      targetPort: 8080
+      nodePort: 31234
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: pg
+spec:
+  type: state.postgresql
+  version: v1
+  metadata:
+    - name: connectionString
+      value: "host=postgres-postgresql user=postgres password=password port=5432 connect_timeout=10"

@@ -1,0 +1,58 @@
+setup:
+  env: kind
+  file: ../kind.yaml
+  steps:
+    - name: install dapr
+      command: |
+        dapr -v || (wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash)
+        dapr init -k --runtime-version 1.11.0 --log-as-json --wait --timeout 600
+      wait:
+        - namespace: dapr-system
+          resource: pod
+          label-selector: app.kubernetes.io/name=dapr
+          for: condition=Ready
+
+    - name: install helm
+      command: |
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+    - name: install postgres
+      command: |
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm install postgres -n default bitnami/postgresql -f test/e2e/openfunction-plugins/pg-values.yaml
+      wait:
+        - namespace: default
+          resource: pod
+          for: condition=Ready
+
+    - name: build image
+      command: |
+        docker build -t openfunction-skywalking-plugins:latest -f test/e2e/openfunction-plugins/Docker.openfunction.skywalking .
+        kind load docker-image openfunction-skywalking-plugins:latest
+
+    - name: setup manifests
+      path: manifests.yaml
+      wait:
+        - namespace: default
+          resource: pod
+          for: condition=Ready
+
+  timeout: 20m
+
+cleanup:
+  # always never success failure
+  on: success
+
+trigger:
+  action: ""
+
+verify:
+  # verify with retry strategy
+  retry:
+    # max retry count
+    count: 60
+    # the interval between two attempts, e.g. 10s, 1m.
+    interval: 60s
+  cases:
+    - query: bash test/e2e/openfunction-plugins/verify.sh 127.0.0.1 80 | yq eval -P  
+      expected: expected.data.yaml

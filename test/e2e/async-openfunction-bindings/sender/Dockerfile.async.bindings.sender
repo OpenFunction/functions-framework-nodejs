@@ -1,0 +1,18 @@
+FROM node:16.17.0-bullseye-slim
+
+# Set working directory
+WORKDIR /ff
+
+# Copy project files to container
+COPY package.json tsconfig.json /ff/
+COPY src /ff/src
+COPY test /ff/test
+
+# Install dependencies
+RUN npm install
+
+# Set working directory to /ff/test/e2e/async-openfunction-bindings/sender
+WORKDIR /ff/test/e2e/async-openfunction-bindings/sender
+
+# Run the ts-node command to execute src/main.ts
+CMD ["../../../../node_modules/.bin/env-cmd", "-e", "async", "../../../../node_modules/.bin/ts-node", "../../../../src/main.ts", "--target=writeAsyncBindingsSender","--signature-type=openfunction"]

@@ -1,0 +1,22 @@
+FROM node:16.17.0-bullseye-slim
+
+# Set working directory
+WORKDIR /ff
+
+# Copy project files to container
+COPY package.json package-lock.json tsconfig.json /ff/
+COPY src /ff/src
+COPY test /ff/test
+
+# Install dependencies
+RUN npm install
+
+RUN npm run build
+
+# Set working directory to /ff/test/e2e/openfunction-plugins
+WORKDIR /ff/test/e2e/openfunction-plugins
+
+RUN npm install
+
+# Run the ts-node command to execute src/main.ts
+CMD ["npm", "run","knative:plugin:run:func"]
