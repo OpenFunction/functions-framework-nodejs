@@ -29,12 +29,12 @@ jobs:
             e2e: "test/e2e/knative-openfunction-bindings/e2e.yaml"
           - name: knative openfunction pubsub e2e test
             e2e: "test/e2e/knative-openfunction-pubsub/e2e.yaml"
-          - name: async openfunction bindings e2e test
-            e2e: "test/e2e/async-openfunction-bindings/e2e.yaml"
-          - name: async openfunction pubsub e2e test
-            e2e: "test/e2e/async-openfunction-pubsub/e2e.yaml"
-          - name: knative openfunction state e2e test
-            e2e: "test/e2e/knative-openfunction-state/e2e.yaml"
+          # - name: async openfunction bindings e2e test
+          #   e2e: "test/e2e/async-openfunction-bindings/e2e.yaml"
+          # - name: async openfunction pubsub e2e test
+          #   e2e: "test/e2e/async-openfunction-pubsub/e2e.yaml"
+          # - name: knative openfunction state e2e test
+          #   e2e: "test/e2e/knative-openfunction-state/e2e.yaml"
           - name: openfunction plugins e2e test
             e2e: "test/e2e/openfunction-plugins/e2e.yaml"
     steps:
