@@ -1,6 +1,6 @@
 # E2E Test
 
-Since the machine configuration provided by GitHub Actions may be insufficient, there are three tests in the `.github/workflows/e2e.yaml` file that cannot run, so they are commented out, but they can be completely run locally. The following is how to run the e2e test locally process.
+In the context of E2E (End-to-End) testing, certain tests within the `.github/workflows/e2e.yaml` file cannot run using the provided machine configuration from GitHub Actions. However, these tests can be executed successfully locally. Below is a guide outlining the process to conduct local E2E tests.
 
 ## Preparations
 
@@ -23,7 +23,7 @@ sudo mv ./kind /usr/local/bin/kind
 
 ### Kubectl
 
-Kind is only responsible for creating the cluster (kubeconfig will be configured), and subsequent cluster operations require kubectl.
+Kind is only responsible for creating the cluster (this will create kubeconfig), and subsequent cluster operations require kubectl.
 
 Official Documentation: https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
 
@@ -37,7 +37,7 @@ sudo mv kubectl /usr/local/bin
 
 ### SkyWalking Infra E2E
 
-An End-to-End Testing framework that aims to help developers to set up, debug, and verify E2E tests with ease.
+SkyWalking Infra E2E is an End-to-End Testing framework that streamlines the setup, debugging, and validation of E2E tests.
 
 Official Documentation: https://skywalking.apache.org/docs/skywalking-infra-e2e/next/readme/
 
@@ -49,29 +49,37 @@ cd skywalking-infra-e2e
 make build
 ```
 
-After these commands, the e2e execute file path is `bin/$PLATFORM/e2e`. You can use the `move` command to move it to your `usr/local/bin` directory so you can use the `e2e` command anywhere
+Upon completion, the executable path for E2E tests is `bin/$PLATFORM/e2e`. You can relocate this to the `usr/local/bin` directory using the `move` command, enabling the use of the e2e command anywhere.
+
 
 ### Yq
 
-a lightweight and portable command-line YAML processor.
+Yq is a lightweight and portable command-line YAML processor.
 
 Official Documentation: https://mikefarah.gitbook.io/yq/
 
 **How to install?**
 
-You can download its binary package from the [GitHub website](https://github.com/mikefarah/yq) and put it in the`/usr/local/bin` directory
+Download the binary package from the [GitHub repository](https://github.com/mikefarah/yq) and place it in the `/usr/local/bin` directory.
+
 
 ## How to run
 
-Take `async openfunction bindings e2e test` as an example
+For illustration purposes, let's consider the `async openfunction bindings e2e` test.
 
-### One step
+### Single Step Execution
 
-You can execute `e2e run -c test/e2e/async-openfunction-bindings/e2e.yaml`
+Execute the following command:
 
-### More steps
+```bash
+e2e run -c test/e2e/async-openfunction-bindings/e2e.yaml
+```
 
-SkyWalking Infra E2E uses a multi-step execution approach.
+
+### Multi-Steps Execution
+
+SkyWalking Infra E2E follows a multi-step approach for execution:
+
 
 1. Prepare the environment for this test
 
@@ -79,7 +87,7 @@ SkyWalking Infra E2E uses a multi-step execution approach.
 e2e setup -c test/e2e/async-openfunction-bindings/e2e.yaml
 ```
 
-2. Trigger this test (we will execute a script when validating the test, this step does not need to be executed in this test)
+2. Trigger the test (a script executes during test validation, so this step is unnecessary for this test):
 
 ```bash
 e2e trigger -c test/e2e/async-openfunction-bindings/e2e.yaml
@@ -91,17 +99,18 @@ e2e trigger -c test/e2e/async-openfunction-bindings/e2e.yaml
 e2e verify -c test/e2e/async-openfunction-bindings/e2e.yaml
 ```
 
-4. Clean up the testing environment
+4. Clean up the test environment
 
 ```bash
 e2e cleanup -c test/e2e/async-openfunction-bindings/e2e.yaml
 ```
 
-If you use the `e2e setup -c **` format, the generated k8s-config will be `/tmp/e2e-k8s.config` 
+When using the format `e2e setup -c **`, the generated Kubernetes configuration is located at `/tmp/e2e-k8s.config`.
 
-In the process of setup, it is actually composed of many small processes. You can follow each sub-step to debug step by step, and use `kubectl` to apply and cancel files. And you can observe the status information of each pod at any time.
+The setup process involves multiple smaller steps. You can debug incrementally by following each sub-step, applying and rolling back files using `kubectl`. At any point, you can monitor the status of individual pods.
 
 ## Results
+Here are the results of the E2E tests:
 
 1. async openfunction bindings e2e test
 
