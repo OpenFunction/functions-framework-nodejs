@@ -5,7 +5,7 @@ jobs:
     name: runner / tsc
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: EPMatt/reviewdog-action-tsc@v1
         with:
           # Change reviewdog reporter if you need
