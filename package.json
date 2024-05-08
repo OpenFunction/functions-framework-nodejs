@@ -69,7 +69,7 @@
     "@types/on-finished": "2.3.1",
     "@types/semver": "^7.3.13",
     "@types/shelljs": "^0.8.11",
-    "@types/sinon": "10.0.11",
+    "@types/sinon": "17.0.3",
     "@types/supertest": "2.0.12",
     "aedes": "0.47.0",
     "clean-pkg-json": "^1.2.0",
@@ -82,7 +82,7 @@
     "pack-n-play": "^2.0.1",
     "pre-push": "^0.1.4",
     "shelljs": "^0.8.5",
-    "sinon": "^16.1.0",
+    "sinon": "^17.0.2",
     "supertest": "6.3.1",
     "typescript": "^4.8.4",
     "wait-on": "^7.0.1"
