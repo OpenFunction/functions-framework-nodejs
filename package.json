@@ -77,7 +77,7 @@
     "cross-env": "^7.0.3",
     "env-cmd": "^10.1.0",
     "graphql-request": "^6.1.0",
-    "gts": "^3.1.1",
+    "gts": "^5.3.1",
     "mocha": "10.1.0",
     "pack-n-play": "^2.0.1",
     "pre-push": "^0.1.4",
