@@ -73,7 +73,7 @@
     "@types/supertest": "2.0.12",
     "aedes": "0.47.0",
     "clean-pkg-json": "^1.2.0",
-    "concurrently": "^8.0.1",
+    "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "env-cmd": "^10.1.0",
     "graphql-request": "^6.1.0",
