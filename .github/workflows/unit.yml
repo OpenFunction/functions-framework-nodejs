@@ -24,7 +24,7 @@ jobs:
         run: docker pull apache/skywalking-oap-server:9.2.0
 
       - name: Install Dapr CLI
-        uses: dapr/setup-dapr@v1
+        uses: dapr/setup-dapr@v2
         with:
           version: '1.9.1'
 
