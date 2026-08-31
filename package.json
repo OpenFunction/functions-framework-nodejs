@@ -72,7 +72,7 @@
     "@types/sinon": "10.0.11",
     "@types/supertest": "2.0.12",
     "aedes": "0.47.0",
-    "clean-pkg-json": "^1.2.0",
+    "clean-pkg-json": "^2.0.0",
     "concurrently": "^8.0.1",
     "cross-env": "^7.0.3",
     "env-cmd": "^10.1.0",
