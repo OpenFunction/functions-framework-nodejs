@@ -70,7 +70,7 @@
     "@types/semver": "^7.3.13",
     "@types/shelljs": "^0.8.11",
     "@types/sinon": "10.0.11",
-    "@types/supertest": "2.0.12",
+    "@types/supertest": "7.2.1",
     "aedes": "0.47.0",
     "clean-pkg-json": "^1.2.0",
     "concurrently": "^8.0.1",
@@ -83,7 +83,7 @@
     "pre-push": "^0.1.4",
     "shelljs": "^0.8.5",
     "sinon": "^16.1.0",
-    "supertest": "6.3.1",
+    "supertest": "7.3.2",
     "typescript": "^4.8.4",
     "wait-on": "^7.0.1"
   }
